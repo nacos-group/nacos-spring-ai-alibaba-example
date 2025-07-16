@@ -4,6 +4,12 @@ server:
 spring:
   application:
     name: nacos-mcp-consumer-example
+  config:
+    import:
+      - "optional:nacos:prompt-config.json"
+  nacos:
+    username: nacos
+    password: nacos
   ai:
     dashscope:
       api-key: ${BAILIAN_API_KEY}
@@ -34,6 +40,10 @@ spring:
                 server1:
                   service-name: nacos-cluster-provider
                   version: 1.0.1
+    nacos:
+      prompt:
+        template:
+          enabled: true
 
 # 调试日志
 logging:

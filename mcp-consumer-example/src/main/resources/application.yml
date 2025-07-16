@@ -1,0 +1,41 @@
+server:
+  port: 18080
+
+spring:
+  application:
+    name: nacos-mcp-consumer-example
+  ai:
+    dashscope:
+      api-key: ${BAILIAN_API_KEY}
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      chat:
+        options:
+          model: deepseek-r1
+    mcp:
+      client:
+        nacos-enabled: true
+        enabled: true
+        name: my-mcp-client
+        version: 1.0.0
+        request-timeout: 30s
+        type: ASYNC  # or ASYNC for reactive applications
+
+    alibaba:
+      mcp:
+        nacos:
+          namespace: public
+          server-addr: 127.0.0.1:8848
+          username: nacos
+          password: nacos
+          client:
+            enabled: true
+            sse:
+              connections:
+                server1:
+                  service-name: nacos-cluster-provider
+                  version: 1.0.1
+
+# 调试日志
+logging:
+  level:
+    root: info

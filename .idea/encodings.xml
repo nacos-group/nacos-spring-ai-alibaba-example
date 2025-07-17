@@ -5,6 +5,8 @@
     <file url="file://$PROJECT_DIR$/mcp-consumer-example/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/mcp-provider-example/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/mcp-provider-example/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp-trans-from-http-example/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp-trans-from-http-example/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
   </component>

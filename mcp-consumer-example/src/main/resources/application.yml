@@ -40,6 +40,9 @@ spring:
                 server1:
                   service-name: nacos-cluster-provider
                   version: 1.0.1
+                server2:
+                  service-name: nacos-mcp-gateway
+                  version: 1.0.1
     nacos:
       prompt:
         template:

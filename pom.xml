@@ -11,6 +11,7 @@
     <modules>
         <module>mcp-provider-example</module>
         <module>mcp-consumer-example</module>
+        <module>mcp-trans-from-http-example</module>
     </modules>
     
     <properties>

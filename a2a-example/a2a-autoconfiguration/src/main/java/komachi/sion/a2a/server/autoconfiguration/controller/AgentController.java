@@ -1,0 +1,141 @@
+package komachi.sion.a2a.server.autoconfiguration.controller;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import io.a2a.jsonrpc.handler.JSONRPCHandler;
+import io.a2a.server.ServerCallContext;
+import io.a2a.spec.CancelTaskRequest;
+import io.a2a.spec.DeleteTaskPushNotificationConfigRequest;
+import io.a2a.spec.GetTaskPushNotificationConfigRequest;
+import io.a2a.spec.GetTaskRequest;
+import io.a2a.spec.JSONParseError;
+import io.a2a.spec.JSONRPCError;
+import io.a2a.spec.JSONRPCErrorResponse;
+import io.a2a.spec.JSONRPCRequest;
+import io.a2a.spec.JSONRPCResponse;
+import io.a2a.spec.ListTaskPushNotificationConfigRequest;
+import io.a2a.spec.NonStreamingJSONRPCRequest;
+import io.a2a.spec.SendMessageRequest;
+import io.a2a.spec.SendStreamingMessageRequest;
+import io.a2a.spec.SetTaskPushNotificationConfigRequest;
+import io.a2a.spec.StreamingJSONRPCRequest;
+import io.a2a.spec.TaskResubscriptionRequest;
+import io.a2a.spec.UnsupportedOperationError;
+import io.a2a.util.Utils;
+import jakarta.servlet.http.HttpServletRequest;
+import org.reactivestreams.FlowAdapters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+
+import java.time.Duration;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Flow;
+import java.util.function.Function;
+
+/**
+ *
+ *
+ * @author xiweng.yy
+ */
+@RestController
+@RequestMapping("/a2a")
+public class AgentController {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(AgentController.class);
+    
+    private final JSONRPCHandler jsonRpcHandler;
+    
+    public AgentController(JSONRPCHandler jsonrpcHandler) {
+        this.jsonRpcHandler = jsonrpcHandler;
+    }
+    
+    @PostMapping(value = "/", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Object handleRequest(@RequestBody String body, HttpServletRequest httpRequest) {
+        ServerCallContext context = buildServerCallContext(httpRequest);
+        boolean streaming = isStreamingRequest(body);
+        Object result = null;
+        try {
+            result = streaming ? handleStreamRequest(body, context) : handleNonStreamRequest(body, context);
+        } catch (JsonProcessingException e) {
+            result = new JSONRPCErrorResponse(null, new JSONParseError());
+        }
+        return result;
+    }
+    
+    private static boolean isStreamingRequest(String requestBody) {
+        try {
+            JsonNode node = Utils.OBJECT_MAPPER.readTree(requestBody);
+            JsonNode method = node != null ? node.get("method") : null;
+            return method != null && (SendStreamingMessageRequest.METHOD.equals(method.asText())
+                    || TaskResubscriptionRequest.METHOD.equals(method.asText()));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    private Flux<?> handleStreamRequest(String body, ServerCallContext context) throws JsonProcessingException {
+        StreamingJSONRPCRequest<?> request = Utils.OBJECT_MAPPER.readValue(body, StreamingJSONRPCRequest.class);
+        Flow.Publisher<? extends JSONRPCResponse<?>> publisher;
+        if (request instanceof SendStreamingMessageRequest req) {
+            publisher = jsonRpcHandler.onMessageSendStream(req, context);
+            LOGGER.info("get Stream publisher {}", publisher);
+        } else if (request instanceof TaskResubscriptionRequest req) {
+            publisher = jsonRpcHandler.onResubscribeToTask(req, context);
+        } else {
+            return Flux.just(generateErrorResponse(request, new UnsupportedOperationError()));
+        }
+        return Flux.from(FlowAdapters.toPublisher(publisher))
+                .map((Function<JSONRPCResponse<?>, JSONRPCResponse<?>>) jsonrpcResponse -> {
+                    LOGGER.info("get response {}", jsonrpcResponse);
+                    return jsonrpcResponse;
+                    //                });
+                    //                }).subscribeOn(Schedulers.parallel()).publishOn(Schedulers.parallel());
+                }).delaySubscription(Duration.ofMillis(10));
+    }
+    
+    private JSONRPCResponse<?> handleNonStreamRequest(String body, ServerCallContext context)
+            throws JsonProcessingException {
+        NonStreamingJSONRPCRequest<?> request = Utils.OBJECT_MAPPER.readValue(body, NonStreamingJSONRPCRequest.class);
+        if (request instanceof GetTaskRequest req) {
+            return jsonRpcHandler.onGetTask(req, context);
+        } else if (request instanceof CancelTaskRequest req) {
+            return jsonRpcHandler.onCancelTask(req, context);
+        } else if (request instanceof SetTaskPushNotificationConfigRequest req) {
+            return jsonRpcHandler.setPushNotificationConfig(req, context);
+        } else if (request instanceof GetTaskPushNotificationConfigRequest req) {
+            return jsonRpcHandler.getPushNotificationConfig(req, context);
+        } else if (request instanceof SendMessageRequest req) {
+            return jsonRpcHandler.onMessageSend(req, context);
+        } else if (request instanceof ListTaskPushNotificationConfigRequest req) {
+            return jsonRpcHandler.listPushNotificationConfig(req, context);
+        } else if (request instanceof DeleteTaskPushNotificationConfigRequest req) {
+            return jsonRpcHandler.deletePushNotificationConfig(req, context);
+        } else {
+            return generateErrorResponse(request, new UnsupportedOperationError());
+        }
+    }
+    
+    private ServerCallContext buildServerCallContext(HttpServletRequest httpRequest) {
+        Map<String, Object> state = new HashMap<>();
+        Map<String, String> headers = new HashMap<>();
+        Enumeration<String> headerNames = httpRequest.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String name = headerNames.nextElement();
+            headers.put(name, httpRequest.getHeader(name));
+        }
+        state.put("headers", headers);
+        return new ServerCallContext(null, state);
+    }
+    
+    private JSONRPCResponse<?> generateErrorResponse(JSONRPCRequest<?> request, JSONRPCError error) {
+        return new JSONRPCErrorResponse(request.getId(), error);
+    }
+}

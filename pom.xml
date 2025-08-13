@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>mcp-example</module>
+        <module>a2a-example</module>
     </modules>
     
     <properties>
@@ -19,6 +20,7 @@
         <spring.ai.alibaba.version>1.0.0.3</spring.ai.alibaba.version>
         <spring-ai.version>1.0.0</spring-ai.version>
         <spring-boot.version>3.4.5</spring-boot.version>
+        <a2a-sdk.version>0.2.6.Beta1-SNAPSHOT</a2a-sdk.version>
     </properties>
     
     <dependencyManagement>
@@ -43,6 +45,22 @@
                 <version>${spring-ai.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            
+            <dependency>
+                <groupId>io.github.a2asdk</groupId>
+                <artifactId>a2a-java-sdk-server-common</artifactId>
+                <version>${a2a-sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.a2asdk</groupId>
+                <artifactId>a2a-java-sdk-transport-jsonrpc</artifactId>
+                <version>${a2a-sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.a2asdk</groupId>
+                <artifactId>a2a-java-sdk-client</artifactId>
+                <version>${a2a-sdk.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

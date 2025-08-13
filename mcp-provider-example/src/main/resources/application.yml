@@ -13,11 +13,10 @@ spring:
     alibaba:
       mcp:
         nacos:
+          #          server-addr: 11.161.207.61:8848         # 替换为你的 Nacos 地址
           server-addr: 127.0.0.1:8848         # 替换为你的 Nacos 地址
           namespace: public    # Nacos 命名空间 ID（默认为public）
           username: nacos          # 开源控制台用户名
           password: nacos          # 开源控制台密码
           registry:
             enabled: true   # 是否开启服务注册
-            service-group: DEFAULT_GROUP
-            service-name: nacos-cluster-provider

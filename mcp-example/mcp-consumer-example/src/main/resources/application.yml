@@ -19,7 +19,6 @@ spring:
           model: deepseek-r1
     mcp:
       client:
-        nacos-enabled: true
         enabled: true
         name: my-mcp-client
         version: 1.0.0
@@ -41,8 +40,8 @@ spring:
                   service-name: nacos-cluster-provider
                   version: 1.0.1
                 server2:
-                  service-name: nacos-mcp-gateway
-                  version: 1.0.1
+                  service-name: nacos-mcp-server-gateway
+                  version: 1.0.0
     nacos:
       prompt:
         template:

@@ -9,16 +9,14 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>mcp-provider-example</module>
-        <module>mcp-consumer-example</module>
-        <module>mcp-trans-from-http-example</module>
+        <module>mcp-example</module>
     </modules>
     
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.ai.alibaba.version>1.0.0.3-SNAPSHOT</spring.ai.alibaba.version>
+        <spring.ai.alibaba.version>1.0.0.3</spring.ai.alibaba.version>
         <spring-ai.version>1.0.0</spring-ai.version>
         <spring-boot.version>3.4.5</spring-boot.version>
     </properties>

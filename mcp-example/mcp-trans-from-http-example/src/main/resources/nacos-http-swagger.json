@@ -1,0 +1,506 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Nacos Admin APIs",
+    "description": "The OpenAPI (Swagger) documentation for Nacos Admin APIs, which are used by Nacos maintainers for troubleshooting and cluster control operations, and provide `management-type` and `gateway-type` applications with capabilities to perform **wide-range data queries** across the system.",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://github.com/alibaba/nacos/blob/develop/LICENSE"
+    },
+    "version": "3.0.1"
+  },
+  "tags": [
+    {
+      "name": "Nacos Naming Client APIs",
+      "description": "APIs for managing and querying client connectivity information in the Nacos registry. Capabilities include listing clients, retrieving client details, inspecting services they publish/subscribe to, and reverse-lookup clients associated with specific services. **Note:** `Client` here refer to abstract Nacos connectivity channels representing interactions between Nacos clients and the Nacos server cluster.",
+      "x-module": {
+        "module": "naming"
+      }
+    },
+    {
+      "name": "Nacos Namespace APIs",
+      "description": "Routines to manage namespaces in the Nacos: list, retrieve, create, update, delete namespaces, and validate namespace IDs.",
+      "x-module": {
+        "module": "common"
+      }
+    }
+  ],
+  "paths": {
+    "/nacos/v3/admin/ns/client/subscribe/list": {
+      "get": {
+        "tags": [
+          "Nacos Naming Client APIs"
+        ],
+        "summary": "List Subscribed Services by Client",
+        "description": "Identifies all services a specific client is subscribed to for service discovery.",
+        "operationId": "getSubscribeServiceList",
+        "parameters": [
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "The accessToken of request to Nacos clusters, if no input, might be with 403 error."
+          },
+          {
+            "name": "clientId",
+            "in": "query",
+            "example": "public",
+            "required": true,
+            "description": "The client id which need to query subscribed services"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result\u003CList\u003CClientServiceInfo\u003E\u003E",
+                  "example": {
+                    "code": 0,
+                    "message": "success",
+                    "data": [
+                      {
+                        "groupName": "DEFAULT_GROUP",
+                        "namespaceId": "public",
+                        "publisherInfo": null,
+                        "serviceName": "com.test.SyncCallbackService",
+                        "subscriberInfo": {
+                          "address": "127.0.0.1",
+                          "agent": "Nacos-Java-Client:v3.0.0-BETA",
+                          "appName": "unknown",
+                          "clientId": null
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "nacos": []
+          }
+        ]
+      }
+    },
+    "/nacos/v3/admin/ns/client/service/subscriber/list": {
+      "get": {
+        "tags": [
+          "Nacos Naming Client APIs"
+        ],
+        "summary": "Find Clients Subscribing to a Service",
+        "description": "Identifies all clients actively discovering instances of the specified service.",
+        "operationId": "getSubscribeClientList",
+        "parameters": [
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "The accessToken of request to Nacos clusters, if no input, might be with 403 error."
+          },
+          {
+            "name": "namespaceId",
+            "in": "query",
+            "example": "public",
+            "description": "The namespaceId of services, default is `public`"
+          },
+          {
+            "name": "groupName",
+            "in": "query",
+            "example": "DEFAULT_GROUP",
+            "description": "The groupName of services, default is `DEFAULT_GROUP`"
+          },
+          {
+            "name": "serviceName",
+            "in": "query",
+            "required": true,
+            "example": "nacos.test.1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result\u003CList\u003CClientSubscriberInfo\u003E\u003E",
+                  "example": {
+                    "code": 0,
+                    "message": "success",
+                    "data": [
+                      {
+                        "address": "127.0.0.1",
+                        "agent": "Nacos-Java-Client:v3.0.0-BETA",
+                        "appName": "unknown",
+                        "clientId": "1741748952410_127.0.0.1_53863"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "nacos": []
+          }
+        ]
+      }
+    },
+    "/nacos/v3/admin/ns/client/service/publisher/list": {
+      "get": {
+        "tags": [
+          "Nacos Naming Client APIs"
+        ],
+        "summary": "Find Clients Publishing a Service",
+        "description": "Locates all clients that have registered at least one instance in the specified service.",
+        "operationId": "getPublishedClientList",
+        "parameters": [
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "The accessToken of request to Nacos clusters, if no input, might be with 403 error."
+          },
+          {
+            "name": "namespaceId",
+            "in": "query",
+            "example": "public",
+            "description": "The namespaceId of services, default is `public`"
+          },
+          {
+            "name": "groupName",
+            "in": "query",
+            "example": "DEFAULT_GROUP",
+            "description": "The groupName of services, default is `DEFAULT_GROUP`"
+          },
+          {
+            "name": "serviceName",
+            "in": "query",
+            "required": true,
+            "example": "nacos.test.1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result\u003CList\u003CClientPublisherInfo\u003E\u003E",
+                  "example": {
+                    "code": 0,
+                    "message": "success",
+                    "data": [
+                      {
+                        "clientId": "1.1.1.1:3306#false",
+                        "clusterName": "DEFAULT",
+                        "ip": "1.1.1.1",
+                        "port": 3306
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "nacos": []
+          }
+        ]
+      }
+    },
+    "/nacos/v3/admin/ns/client/publish/list": {
+      "get": {
+        "tags": [
+          "Nacos Naming Client APIs"
+        ],
+        "summary": "List Published Services by Client",
+        "description": "Discovers all services that a specified client has registered instances in.",
+        "operationId": "getPublishedServiceList",
+        "parameters": [
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "The accessToken of request to Nacos clusters, if no input, might be with 403 error."
+          },
+          {
+            "name": "clientId",
+            "in": "query",
+            "example": "public",
+            "required": true,
+            "description": "The client id which need to query registered services"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result\u003CList\u003CClientServiceInfo\u003E\u003E",
+                  "example": {
+                    "code": 0,
+                    "message": "success",
+                    "data": [
+                      {
+                        "groupName": "DEFAULT_GROUP",
+                        "namespaceId": "public",
+                        "publisherInfo": {
+                          "clientId": null,
+                          "clusterName": "DEFAULT",
+                          "ip": "1.1.1.1",
+                          "port": 3306
+                        },
+                        "serviceName": "test",
+                        "subscriberInfo": null
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "nacos": []
+          }
+        ]
+      }
+    },
+    "/nacos/v3/admin/core/namespace/list": {
+      "get": {
+        "tags": [
+          "Nacos Namespace APIs"
+        ],
+        "summary": "List Nacos namespaces",
+        "description": "Retrieves the list of namespaces in the current Nacos cluster.",
+        "operationId": "getNamespaceList",
+        "parameters": [
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "The accessToken of request to Nacos clusters, if no input, might be with 403 error."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result\u003CList\u003CNamespace\u003E\u003E",
+                  "example": {
+                    "code": 0,
+                    "message": "success",
+                    "data": [
+                      {
+                        "namespace": "public",
+                        "namespaceShowName": "public",
+                        "namespaceDesc": "Default Namespace",
+                        "quota": 200,
+                        "configCount": 0,
+                        "type": 0
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "nacos": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Result\u003CList\u003CClientSubscriberInfo\u003E\u003E": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "clientId": {
+                  "type": "string"
+                },
+                "appName": {
+                  "type": "string"
+                },
+                "agent": {
+                  "type": "string"
+                },
+                "address": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Result\u003CList\u003CClientPublisherInfo\u003E\u003E": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "clientId": {
+                  "type": "string"
+                },
+                "ip": {
+                  "type": "string"
+                },
+                "port": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "clusterName": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Result\u003CList\u003CClientServiceInfo\u003E\u003E": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "namespaceId": {
+                  "type": "string"
+                },
+                "groupName": {
+                  "type": "string"
+                },
+                "serviceName": {
+                  "type": "string"
+                },
+                "publisherInfo": {
+                  "$ref": "#/components/schemas/ClientPublisherInfo"
+                },
+                "subscriberInfo": {
+                  "$ref": "#/components/schemas/ClientSubscriberInfo"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Result\u003CList\u003CNamespace\u003E\u003E": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "namespace": {
+                  "type": "string"
+                },
+                "namespaceShowName": {
+                  "type": "string"
+                },
+                "namespaceDesc": {
+                  "type": "string"
+                },
+                "quota": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "configCount": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "type": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ClientPublisherInfo": {
+        "properties": {
+          "clientId": {
+            "type": "string"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "port": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "clusterName": {
+            "type": "string"
+          }
+        }
+      },
+      "ClientSubscriberInfo": {
+        "properties": {
+          "clientId": {
+            "type": "string"
+          },
+          "appName": {
+            "type": "string"
+          },
+          "agent": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        }
+      },
+    },
+    "securitySchemes": {
+      "nacos": {
+        "type": "apiKey",
+        "description": "Get `accessToken` by `login` API.",
+        "name": "accessToken",
+        "in": "header"
+      }
+    }
+  }
+}

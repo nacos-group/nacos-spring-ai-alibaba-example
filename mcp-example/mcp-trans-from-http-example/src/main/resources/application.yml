@@ -7,17 +7,22 @@ spring:
   ai:
     mcp:
       server:
-        name: nacos-trans-from-http   # MCP服务名称
+        name: nacos-mcp-server-gateway   # MCP服务名称
         version: 1.0.0            # 服务版本
         type: ASYNC                # 调用类型：SYNC（同步）或ASYNC（异步）
     alibaba:
       mcp:
+        router:
+          enabled: false
         nacos:
           server-addr: 127.0.0.1:8848         # 替换为你的 Nacos 地址
           namespace: public    # Nacos 命名空间 ID（默认为public）
           username: nacos          # 开源控制台用户名
           password: nacos          # 开源控制台密码
-          gateway:
-            enabled: true
+          register:
+            enabled: true   # 是否开启服务注册
+        gateway:
+          enabled: true
+          nacos:
             service-names:
-              - nacos-namespace-mcp-server
+              - nacos-http-mcp-server

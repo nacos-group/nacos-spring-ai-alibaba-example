@@ -28,7 +28,7 @@ public class ChatClientConfiguration {
     @Bean
     public AgentCard agentCard() {
         return new AgentCard.Builder()
-                .name("Nacos Agent")
+                .name("Nacos_Agent")
                 .description("Answer question about Nacos and do some maintain and query operation about Nacos Cluster.")
                 .url("http://localhost:9999/a2a/")
                 .version("1.0.0")

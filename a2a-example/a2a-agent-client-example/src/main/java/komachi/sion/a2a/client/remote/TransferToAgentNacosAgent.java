@@ -1,11 +1,13 @@
 package komachi.sion.a2a.client.remote;
 
+import com.alibaba.nacos.api.ai.model.a2a.AgentCard;
+import com.alibaba.nacos.api.exception.NacosException;
+import com.alibaba.nacos.maintainer.client.ai.A2aMaintainerService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.a2a.A2A;
 import io.a2a.client.A2AClient;
 import io.a2a.spec.A2AClientError;
 import io.a2a.spec.A2AServerException;
-import io.a2a.spec.AgentCard;
 import io.a2a.spec.EventKind;
 import io.a2a.spec.Message;
 import io.a2a.spec.MessageSendConfiguration;
@@ -15,6 +17,7 @@ import io.a2a.spec.SendMessageResponse;
 import io.a2a.spec.TextPart;
 import io.a2a.util.Utils;
 import io.modelcontextprotocol.spec.McpSchema;
+import komachi.sion.a2a.client.utils.AgentCardConverterUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
@@ -23,7 +26,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -35,12 +40,16 @@ public class TransferToAgentNacosAgent implements ToolCallback, RemoteAgent {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(TransferToAgentNacosAgent.class);
     
-    private final AgentCard agentCard;
+    private final io.a2a.spec.AgentCard agentCard;
     
     private final A2AClient a2AClient;
+
+    private final A2aMaintainerService a2aMaintainerService;
     
-    public TransferToAgentNacosAgent() throws A2AClientError {
-        this.agentCard = A2A.getAgentCard("http://localhost:9999");
+    public TransferToAgentNacosAgent(A2aMaintainerService a2aMaintainerService) throws A2AClientError, NacosException {
+        this.a2aMaintainerService = a2aMaintainerService;
+//        this.agentCard = A2A.getAgentCard("http://localhost:9999");
+        this.agentCard = getAgentCardFromNacos("Nacos_Agent");
         this.a2AClient = new A2AClient(agentCard);
     }
     
@@ -93,5 +102,10 @@ public class TransferToAgentNacosAgent implements ToolCallback, RemoteAgent {
         result.put("description", agentCard.description());
         result.put("skills", agentCard.skills());
         return result;
+    }
+
+    private io.a2a.spec.AgentCard getAgentCardFromNacos(String agentName) throws NacosException {
+        AgentCard nacosAgentCard = a2aMaintainerService.getAgentCard(agentName, "public");
+        return AgentCardConverterUtil.convertToA2aAgentCard(nacosAgentCard);
     }
 }

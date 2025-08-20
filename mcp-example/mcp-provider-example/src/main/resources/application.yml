@@ -15,7 +15,7 @@ spring:
         nacos:
           server-addr: ${NACOS_ADDRESS_ENV:127.0.0.1:8848}         # 替换为你的 Nacos 地址
           namespace: public    # Nacos 命名空间 ID（默认为public）
-          username: nacos          # 开源控制台用户名
-          password: nacos          # 开源控制台密码
+          username: ${NACOS_USERNAME_ENV:nacos}          # 开源控制台用户名
+          password: ${NACOS_PASSWORD_ENV:nacos}          # 开源控制台密码
           register:
             enabled: true   # 是否开启服务注册

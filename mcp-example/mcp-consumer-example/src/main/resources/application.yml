@@ -8,8 +8,8 @@ spring:
     import:
       - "optional:nacos:prompt-config.json"
   nacos:
-    username: nacos
-    password: nacos
+    username: ${NACOS_USERNAME_ENV:nacos}
+    password: ${NACOS_PASSWORD_ENV:nacos}
   ai:
     dashscope:
       api-key: ${BAILIAN_API_KEY}
@@ -31,8 +31,8 @@ spring:
         nacos:
           namespace: public
           server-addr: ${NACOS_ADDRESS_ENV:127.0.0.1:8848}
-          username: nacos
-          password: nacos
+          username: ${NACOS_USERNAME_ENV:nacos}
+          password: ${NACOS_PASSWORD_ENV:nacos}
           client:
             enabled: true
             sse:

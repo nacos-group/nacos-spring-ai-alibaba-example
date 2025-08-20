@@ -43,6 +43,10 @@
 ```shell
 # 必填，否则无法访问百炼大模型
 export BAILIAN_API_KEY=${your_bailian_api_key}
+# 可选，默认为nacos，如果您部署的Nacos集群有自定义用户，需设置此环境变量为正确的Nacos访问用户
+export NACOS_USERNAME_ENV=nacos
+# 可选，默认为nacos，如果您部署的Nacos集群有自定义密码，需设置此环境变量为正确的Nacos访问用户密码
+export NACOS_PASSWORD_ENV=nacos
 # 可选，默认为127.0.0.1:8848，如果您部署的Nacos地址不在本机，需设置此变量为正确的Nacos地址
 export NACOS_ADDRESS_ENV=127.0.0.1:8848
 ```

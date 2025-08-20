@@ -73,6 +73,7 @@ public class TransferToAgentNacosAgent implements ToolCallback, RemoteAgent {
                 if (responseMessage.getParts() != null) {
                     for (Part<?> part : responseMessage.getParts()) {
                         if (part instanceof TextPart textPart) {
+                            LOGGER.info("[TMP SHOW] message text info: {}", textPart.getText());
                             textBuilder.append(textPart.getText());
                         }
                     }

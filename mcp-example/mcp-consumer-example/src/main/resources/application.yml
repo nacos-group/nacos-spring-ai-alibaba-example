@@ -30,7 +30,7 @@ spring:
       mcp:
         nacos:
           namespace: public
-          server-addr: 127.0.0.1:8848
+          server-addr: ${NACOS_ADDRESS_ENV:127.0.0.1:8848}
           username: nacos
           password: nacos
           client:

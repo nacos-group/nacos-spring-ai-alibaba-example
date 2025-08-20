@@ -15,7 +15,7 @@ spring:
         router:
           enabled: false
         nacos:
-          server-addr: 127.0.0.1:8848         # 替换为你的 Nacos 地址
+          server-addr: ${NACOS_ADDRESS_ENV:127.0.0.1:8848}         # 替换为你的 Nacos 地址
           namespace: public    # Nacos 命名空间 ID（默认为public）
           username: nacos          # 开源控制台用户名
           password: nacos          # 开源控制台密码

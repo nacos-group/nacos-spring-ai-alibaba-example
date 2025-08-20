@@ -47,7 +47,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot.version}</version>
+                <configuration>
+                    <mainClass>komachi.sion.mcp.consumer.McpConsumerApplication</mainClass>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>

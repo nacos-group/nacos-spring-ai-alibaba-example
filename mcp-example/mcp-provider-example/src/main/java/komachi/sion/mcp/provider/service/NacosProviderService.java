@@ -62,7 +62,7 @@ public class NacosProviderService {
         result.accessToken = nacosInfo.accessToken;
         result.username = nacosInfo.username;
         result.password = ClientBasicParamUtil.desensitiseParameter(nacosInfo.password);
-        return JacksonUtils.toJson(nacosInfo);
+        return JacksonUtils.toJson(result);
     }
     
     @Tool(description = "Login and register nacos cluster.")

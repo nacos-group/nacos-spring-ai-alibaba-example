@@ -55,7 +55,7 @@ public class NacosController {
     }
     
     private Prompt buildPrompt(String query) {
-        return promptTemplateFactory.getTemplate("nacos-prompt").create(Map.of("query", query));
+        return promptTemplateFactory.getTemplate("nacos-prompt-cn").create(Map.of("query", query));
     }
     
     private class StreamResultFunction implements Function<ChatResponse, String> {

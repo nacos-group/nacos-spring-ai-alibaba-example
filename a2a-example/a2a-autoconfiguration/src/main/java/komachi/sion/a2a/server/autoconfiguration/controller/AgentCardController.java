@@ -2,6 +2,7 @@ package komachi.sion.a2a.server.autoconfiguration.controller;
 
 import io.a2a.jsonrpc.handler.JSONRPCHandler;
 import io.a2a.spec.AgentCard;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/")
+@ConditionalOnProperty(prefix = "spring.ai.alibaba.a2a", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class AgentCardController {
     
     private final JSONRPCHandler jsonRpcHandler;

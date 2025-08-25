@@ -26,6 +26,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.reactivestreams.FlowAdapters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,6 +48,7 @@ import java.util.function.Function;
  */
 @RestController
 @RequestMapping("/a2a")
+@ConditionalOnProperty(prefix = "spring.ai.alibaba.a2a", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class AgentController {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentController.class);

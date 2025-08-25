@@ -1,4 +1,4 @@
-package komachi.sion.a2a.server.autoconfiguration;
+package komachi.sion.a2a.server.autoconfiguration.configuration;
 
 import io.a2a.jsonrpc.handler.JSONRPCHandler;
 import io.a2a.server.agentexecution.AgentExecutor;
@@ -15,6 +15,7 @@ import io.a2a.server.tasks.TaskStore;
 import io.a2a.spec.AgentCard;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,6 +29,7 @@ import java.util.concurrent.Executors;
  * @author xiweng.yy
  */
 @Configuration
+@ConditionalOnProperty(prefix = "spring.ai.alibaba.a2a", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class AgentHandlerConfiguration {
     
     private ExecutorService executor;

@@ -37,6 +37,12 @@
             <groupId>io.github.a2asdk</groupId>
             <artifactId>a2a-java-sdk-client</artifactId>
         </dependency>
+        
+        <dependency>
+            <groupId>org.example</groupId>
+            <artifactId>a2a-autoconfiguration</artifactId>
+            <version>${version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.alibaba.nacos</groupId>

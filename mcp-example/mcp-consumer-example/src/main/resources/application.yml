@@ -8,15 +8,16 @@ spring:
     import:
       - "optional:nacos:prompt-config.json"
   nacos:
-    username: nacos
-    password: nacos
+    username: ${NACOS_USERNAME_ENV:nacos}
+    password: ${NACOS_PASSWORD_ENV:nacos}
   ai:
     dashscope:
       api-key: ${BAILIAN_API_KEY}
       base-url: https://dashscope.aliyuncs.com/compatible-mode
       chat:
         options:
-          model: deepseek-r1
+          model: qwen-plus-latest
+          enable-thinking: true
     mcp:
       client:
         enabled: true
@@ -29,9 +30,9 @@ spring:
       mcp:
         nacos:
           namespace: public
-          server-addr: 127.0.0.1:8848
-          username: nacos
-          password: nacos
+          server-addr: ${NACOS_ADDRESS_ENV:127.0.0.1:8848}
+          username: ${NACOS_USERNAME_ENV:nacos}
+          password: ${NACOS_PASSWORD_ENV:nacos}
           client:
             enabled: true
             sse:

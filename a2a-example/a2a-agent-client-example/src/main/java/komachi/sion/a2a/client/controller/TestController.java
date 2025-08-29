@@ -1,5 +1,8 @@
 package komachi.sion.a2a.client.controller;
 
+import com.alibaba.cloud.ai.graph.agent.BaseAgent;
+import com.alibaba.cloud.ai.graph.exception.GraphRunnerException;
+import com.alibaba.cloud.ai.graph.exception.GraphStateException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientResponse;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -24,8 +28,11 @@ public class TestController {
     
     private final ChatClient dashScopeChatClient;
     
-    public TestController(ChatClient chatClient) {
+    private final BaseAgent baseAgent;
+    
+    public TestController(ChatClient chatClient, BaseAgent baseAgent) {
         this.dashScopeChatClient = chatClient;
+        this.baseAgent = baseAgent;
     }
     
     @GetMapping("/simple/chat")
@@ -44,6 +51,12 @@ public class TestController {
         Flux<ChatClientResponse> chatClientResponse = dashScopeChatClient.prompt(query).stream().chatClientResponse();
         return chatClientResponse.mapNotNull(ChatClientResponse::chatResponse).map(new StreamResultFunction())
                 .filter(StringUtils::hasLength);
+    }
+    
+    @GetMapping("/agent/chat")
+    public String agentChat(@RequestParam(value = "query", defaultValue = "你好，请随机生成一个数字") String query)
+            throws GraphStateException, GraphRunnerException {
+        return baseAgent.invoke(Map.of("input", query)).orElseThrow().toString();
     }
     
     private class StreamResultFunction implements Function<ChatResponse, String> {

@@ -1,14 +1,27 @@
 package komachi.sion.a2a.client.configuration;
 
+import com.alibaba.cloud.ai.graph.KeyStrategy;
+import com.alibaba.cloud.ai.graph.KeyStrategyFactory;
+import com.alibaba.cloud.ai.graph.agent.BaseAgent;
+import com.alibaba.cloud.ai.graph.agent.ReactAgent;
+import com.alibaba.cloud.ai.graph.agent.flow.agent.LlmRoutingAgent;
+import com.alibaba.cloud.ai.graph.exception.GraphStateException;
+import com.alibaba.cloud.ai.graph.state.strategy.ReplaceStrategy;
+import com.alibaba.nacos.api.exception.NacosException;
+import com.alibaba.nacos.maintainer.client.ai.A2aMaintainerService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.a2a.util.Utils;
+import komachi.sion.a2a.client.remote.NacosA2aRemoteAgent;
 import komachi.sion.a2a.client.remote.RemoteAgent;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +43,9 @@ public class CharClientConfiguration {
             + "If you think another agent is better for answering the question according to its description, call `transfer_to_agent_$sub_agent_name` tool to transfer the question to that agent. you should replace $sub_agent_name by agent names from sub_agent_list_json.\n"
             + "When transferring, do not generate any text other than the tool call.\n";
     
+    private static final String COMMON_QUESTION_ANSWER_PROMPT = "## Role \n\n"
+            + "You are a helpful assistant, you should try you best to answer users' problem according your knowledge.";
+    
     @Bean
     public ChatClient chatClient(ChatClient.Builder chatClientBuilder, ToolCallback... toolCallbacks)
             throws JsonProcessingException {
@@ -44,5 +60,29 @@ public class CharClientConfiguration {
             promptSystemSpec.text(SYSTEM_PROMPT);
             promptSystemSpec.params(Collections.singletonMap("sub_agent_list_json", subAgentListJson));
         }).defaultToolCallbacks(toolCallbacks).build();
+    }
+    
+    @Bean
+    @Primary
+    public BaseAgent OrchestratorAgent(ChatModel chatModel, A2aMaintainerService a2aMaintainerService)
+            throws GraphStateException, NacosException {
+        ReactAgent commonQuestionAnswerAgent = ReactAgent.builder().name("common_question_answer_agent")
+                .description("Agent to answer common question").instruction(COMMON_QUESTION_ANSWER_PROMPT)
+                .model(chatModel).outputKey("output").build();
+        NacosA2aRemoteAgent blogWriterAgent = new NacosA2aRemoteAgent.Builder().a2aMaintainerService(
+                a2aMaintainerService).name("Blog_Writing_Agent").build();
+        NacosA2aRemoteAgent nacosAgent = new NacosA2aRemoteAgent.Builder().a2aMaintainerService(a2aMaintainerService)
+                .name("Nacos_Agent").build();
+        KeyStrategyFactory stateFactory = () -> {
+            HashMap<String, KeyStrategy> keyStrategyHashMap = new HashMap<>();
+            keyStrategyHashMap.put("input", new ReplaceStrategy());
+            keyStrategyHashMap.put("output", new ReplaceStrategy());
+            keyStrategyHashMap.put("article", new ReplaceStrategy());
+            keyStrategyHashMap.put("reviewed_article", new ReplaceStrategy());
+            return keyStrategyHashMap;
+        };
+        return LlmRoutingAgent.builder().name("orchestrator").description("An orchestrator agent").model(chatModel)
+                .subAgents(List.of(commonQuestionAnswerAgent, blogWriterAgent, nacosAgent)).state(stateFactory)
+                .inputKey("input").outputKey("output").build();
     }
 }

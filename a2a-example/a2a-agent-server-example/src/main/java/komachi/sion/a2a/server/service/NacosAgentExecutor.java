@@ -82,8 +82,8 @@ public class NacosAgentExecutor implements AgentExecutor {
         Task task = buildNewTaskIfAbsent(context, eventQueue);
         TaskUpdater updater = buildNewTask(context, eventQueue);
         Flux<ChatResponse> chatResponse = chatClient.prompt(string).stream().chatResponse();
-        chatResponse.subscribe(new TokenByTokenSubscriber(updater, context));
-//        chatResponse.subscribe(new TypedSubscriber(updater, context));
+//        chatResponse.subscribe(new TokenByTokenSubscriber(updater, context));
+        chatResponse.subscribe(new TypedSubscriber(updater, context));
         waitTaskCompleted(task);
     }
     

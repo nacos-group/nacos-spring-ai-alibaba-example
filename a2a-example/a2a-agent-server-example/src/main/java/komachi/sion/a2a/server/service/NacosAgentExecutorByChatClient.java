@@ -1,13 +1,10 @@
 package komachi.sion.a2a.server.service;
 
-import com.alibaba.nacos.api.exception.NacosException;
-import com.alibaba.nacos.maintainer.client.ai.A2aMaintainerService;
 import io.a2a.A2A;
 import io.a2a.server.agentexecution.AgentExecutor;
 import io.a2a.server.agentexecution.RequestContext;
 import io.a2a.server.events.EventQueue;
 import io.a2a.server.tasks.TaskUpdater;
-import io.a2a.spec.AgentCard;
 import io.a2a.spec.JSONRPCError;
 import io.a2a.spec.Message;
 import io.a2a.spec.Part;
@@ -15,8 +12,6 @@ import io.a2a.spec.Task;
 import io.a2a.spec.TaskState;
 import io.a2a.spec.TaskStatus;
 import io.a2a.spec.TextPart;
-import jakarta.annotation.PostConstruct;
-import komachi.sion.a2a.server.utils.AgentCardConverterUtil;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
@@ -24,7 +19,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.stereotype.Service;
+import org.springframework.ai.model.tool.ToolCallingChatOptions;
+import org.springframework.ai.tool.ToolCallbackProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 
@@ -37,26 +34,17 @@ import java.util.concurrent.TimeUnit;
  *
  * @author xiweng.yy
  */
-@Service
-public class NacosAgentExecutor implements AgentExecutor {
+public class NacosAgentExecutorByChatClient implements AgentExecutor {
     
-    private final static Logger LOGGER = LoggerFactory.getLogger(NacosAgentExecutor.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(NacosAgentExecutorByChatClient.class);
     
     private final ChatClient chatClient;
-
-    private final AgentCard agentCard;
-
-    private final A2aMaintainerService a2aMaintainerService;
-
-    public NacosAgentExecutor(ChatClient chatClient, AgentCard agentCard, A2aMaintainerService a2aMaintainerService) {
+    
+    private final ToolCallbackProvider tools;
+    
+    public NacosAgentExecutorByChatClient(ChatClient chatClient, ToolCallbackProvider tools) {
         this.chatClient = chatClient;
-        this.agentCard = agentCard;
-        this.a2aMaintainerService = a2aMaintainerService;
-    }
-
-    @PostConstruct
-    public void init() throws NacosException {
-        a2aMaintainerService.registerAgent(AgentCardConverterUtil.convertToNacosAgentCard(agentCard), "public");
+        this.tools = tools;
     }
     
     @Override
@@ -71,7 +59,7 @@ public class NacosAgentExecutor implements AgentExecutor {
             }
         }
         if (null != context.getParams().configuration() && context.getParams().configuration().blocking()) {
-            String result = chatClient.prompt(sb.toString()).call().content();
+            String result = chatClient.prompt(sb.toString()).toolCallbacks(tools).call().content();
             eventQueue.enqueueEvent(A2A.toAgentMessage(result));
         } else {
             doAsyncTask(context, eventQueue, sb.toString());
@@ -81,8 +69,11 @@ public class NacosAgentExecutor implements AgentExecutor {
     private void doAsyncTask(RequestContext context, EventQueue eventQueue, String string) {
         Task task = buildNewTaskIfAbsent(context, eventQueue);
         TaskUpdater updater = buildNewTask(context, eventQueue);
-        Flux<ChatResponse> chatResponse = chatClient.prompt(string).stream().chatResponse();
-//        chatResponse.subscribe(new TokenByTokenSubscriber(updater, context));
+        Flux<ChatResponse> chatResponse = chatClient.prompt(string).options(ToolCallingChatOptions.builder()
+                .toolCallbacks(tools.getToolCallbacks())
+                .internalToolExecutionEnabled(true)
+                .build()).stream().chatResponse();
+        //        chatResponse.subscribe(new TokenByTokenSubscriber(updater, context));
         chatResponse.subscribe(new TypedSubscriber(updater, context));
         waitTaskCompleted(task);
     }

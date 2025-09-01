@@ -11,22 +11,39 @@ spring:
       chat:
         options:
           model: deepseek-r1
+    mcp:
+      client:
+        enabled: true
+        name: my-mcp-client
+        version: 1.0.0
+        request-timeout: 30s
+        type: ASYNC  # or ASYNC for reactive applications
     alibaba:
       a2a:
         nacos:
           server-addr: 127.0.0.1:8848
           username: ${NACOS_USERNAME:nacos}
           password: ${NACOS_PASSWORD}
+      mcp:
+        nacos:
+          namespace: public
+          server-addr: ${NACOS_ADDRESS_ENV:127.0.0.1:8848}
+          username: ${NACOS_USERNAME:nacos}
+          password: ${NACOS_PASSWORD}
+          client:
+            enabled: true
+            sse:
+              connections:
+                server1:
+                  service-name: nacos-mcp-server-gateway
+                  version: 1.0.0
 
 # 调试日志
 logging:
   level:
     root: info
-    io:
-      a2a: debug
-    org:
-      springframework:
-        web:
-          reactive: debug
-    reactor:
-      netty: debug
+    com:
+      alibaba:
+        cloud:
+          ai:
+            graph: DEBUG

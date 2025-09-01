@@ -1,5 +1,5 @@
 server:
-  port: 9999  # 服务器端口配置
+  port: 9998  # 服务器端口配置
 
 spring:
   application:

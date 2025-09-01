@@ -17,7 +17,7 @@ import io.a2a.spec.SendMessageResponse;
 import io.a2a.spec.TextPart;
 import io.a2a.util.Utils;
 import io.modelcontextprotocol.spec.McpSchema;
-import komachi.sion.a2a.client.utils.AgentCardConverterUtil;
+import komachi.sion.a2a.server.autoconfiguration.utils.AgentCardConverterUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
@@ -26,9 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  *

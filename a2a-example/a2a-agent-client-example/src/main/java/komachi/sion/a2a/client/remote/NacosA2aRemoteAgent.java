@@ -12,7 +12,7 @@ import com.alibaba.nacos.api.ai.model.a2a.AgentCard;
 import com.alibaba.nacos.api.common.Constants;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.maintainer.client.ai.A2aMaintainerService;
-import komachi.sion.a2a.client.utils.AgentCardConverterUtil;
+import komachi.sion.a2a.server.autoconfiguration.utils.AgentCardConverterUtil;
 
 import java.util.Map;
 import java.util.Optional;

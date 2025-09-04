@@ -2,8 +2,8 @@ package komachi.sion.a2a.server.autoconfiguration;
 
 import com.alibaba.nacos.api.PropertyKeyConst;
 import com.alibaba.nacos.api.exception.NacosException;
-import com.alibaba.nacos.maintainer.client.ai.A2aMaintainerFactory;
 import com.alibaba.nacos.maintainer.client.ai.A2aMaintainerService;
+import com.alibaba.nacos.maintainer.client.ai.AiMaintainerFactory;
 import komachi.sion.a2a.server.autoconfiguration.configuration.AgentHandlerConfiguration;
 import komachi.sion.a2a.server.autoconfiguration.properties.NacosA2aProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -32,6 +32,6 @@ public class NacosA2aRegisterAutoConfiguration {
         properties.setProperty(PropertyKeyConst.NAMESPACE, nacosA2aProperties.getNamespace());
         properties.setProperty(PropertyKeyConst.USERNAME, nacosA2aProperties.getUsername());
         properties.setProperty(PropertyKeyConst.PASSWORD, nacosA2aProperties.getPassword());
-        return A2aMaintainerFactory.createA2aMaintainerService(properties);
+        return AiMaintainerFactory.createAiMaintainerService(properties);
     }
 }

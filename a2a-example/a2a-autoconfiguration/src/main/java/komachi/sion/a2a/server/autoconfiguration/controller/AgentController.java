@@ -61,8 +61,8 @@ public class AgentController {
     
     @PostMapping(value = "/", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Object handleRequest(@RequestBody String body, HttpServletRequest httpRequest) {
-        ServerCallContext context = buildServerCallContext(httpRequest);
         boolean streaming = isStreamingRequest(body);
+        ServerCallContext context = buildServerCallContext(httpRequest, streaming);
         Object result = null;
         try {
             result = streaming ? handleStreamRequest(body, context) : handleNonStreamRequest(body, context);
@@ -96,7 +96,7 @@ public class AgentController {
         }
         return Flux.from(FlowAdapters.toPublisher(publisher))
                 .map((Function<JSONRPCResponse<?>, JSONRPCResponse<?>>) jsonrpcResponse -> {
-                    LOGGER.info("get response {}", jsonrpcResponse);
+//                    LOGGER.info("get response {}", jsonrpcResponse);
                     return jsonrpcResponse;
                     //                });
                     //                }).subscribeOn(Schedulers.parallel()).publishOn(Schedulers.parallel());
@@ -125,7 +125,7 @@ public class AgentController {
         }
     }
     
-    private ServerCallContext buildServerCallContext(HttpServletRequest httpRequest) {
+    private ServerCallContext buildServerCallContext(HttpServletRequest httpRequest, boolean streaming) {
         Map<String, Object> state = new HashMap<>();
         Map<String, String> headers = new HashMap<>();
         Enumeration<String> headerNames = httpRequest.getHeaderNames();
@@ -134,6 +134,7 @@ public class AgentController {
             headers.put(name, httpRequest.getHeader(name));
         }
         state.put("headers", headers);
+        state.put("streaming", streaming);
         return new ServerCallContext(null, state);
     }
     

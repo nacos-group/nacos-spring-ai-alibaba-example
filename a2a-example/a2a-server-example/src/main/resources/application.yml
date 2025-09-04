@@ -11,3 +11,9 @@ spring:
       chat:
         options:
           model: deepseek-r1
+
+    alibaba:
+      a2a:
+        nacos:
+          username: nacos
+          password: nacos

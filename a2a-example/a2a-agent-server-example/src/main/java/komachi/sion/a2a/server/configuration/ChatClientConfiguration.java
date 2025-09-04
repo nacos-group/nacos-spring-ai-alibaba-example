@@ -101,6 +101,6 @@ public class ChatClientConfiguration {
                 }).postLlmHook(state -> {
                     LOGGER.info("Current Agent `{}` call llm completed", agentCard.name());
                     return Map.of();
-                }).outputKey("output").build();
+                }).outputKey("messages").build();
     }
 }

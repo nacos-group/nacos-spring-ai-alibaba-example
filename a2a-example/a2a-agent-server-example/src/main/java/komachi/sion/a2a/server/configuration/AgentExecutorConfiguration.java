@@ -23,14 +23,14 @@ import org.springframework.context.annotation.Primary;
 public class AgentExecutorConfiguration {
     
     @Bean
-//    @Primary
+    //    @Primary
     public AgentExecutor agentExecutorByChatClient(ChatClient chatClient,
             @Qualifier("loadbalancedMcpAsyncToolCallbacks") ToolCallbackProvider tools) {
         return new NacosAgentExecutorByChatClient(chatClient, tools);
     }
     
     @Bean
-        @Primary
+    @Primary
     public AgentExecutor agentExecutorBySaaAgent(ReactAgent agent) {
         return new NacosAgentExecutorBySaaAgent(agent);
     }

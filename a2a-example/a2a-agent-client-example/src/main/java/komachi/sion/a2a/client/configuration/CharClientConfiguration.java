@@ -68,9 +68,9 @@ public class CharClientConfiguration {
             throws GraphStateException, NacosException {
         ReactAgent commonQuestionAnswerAgent = ReactAgent.builder().name("common_question_answer_agent")
                 .description("Agent to answer common question").instruction(COMMON_QUESTION_ANSWER_PROMPT)
-                .model(chatModel).outputKey("output").build();
-        NacosA2aRemoteAgent blogWriterAgent = new NacosA2aRemoteAgent.Builder().a2aMaintainerService(
-                a2aMaintainerService).name("Blog_Writing_Agent").build();
+                .model(chatModel).outputKey("messages").build();
+//        NacosA2aRemoteAgent blogWriterAgent = new NacosA2aRemoteAgent.Builder().a2aMaintainerService(
+//                a2aMaintainerService).name("Blog_Writing_Agent").build();
         NacosA2aRemoteAgent nacosAgent = new NacosA2aRemoteAgent.Builder().a2aMaintainerService(a2aMaintainerService)
                 .name("Nacos_Agent").build();
         KeyStrategyFactory stateFactory = () -> {
@@ -81,8 +81,11 @@ public class CharClientConfiguration {
             keyStrategyHashMap.put("reviewed_article", new ReplaceStrategy());
             return keyStrategyHashMap;
         };
+//        return LlmRoutingAgent.builder().name("orchestrator").description("An orchestrator agent").model(chatModel)
+//                .subAgents(List.of(commonQuestionAnswerAgent, blogWriterAgent, nacosAgent)).state(stateFactory)
+//                .inputKey("input").outputKey("output").build();
         return LlmRoutingAgent.builder().name("orchestrator").description("An orchestrator agent").model(chatModel)
-                .subAgents(List.of(commonQuestionAnswerAgent, blogWriterAgent, nacosAgent)).state(stateFactory)
-                .inputKey("input").outputKey("output").build();
+                .subAgents(List.of(commonQuestionAnswerAgent, nacosAgent)).state(stateFactory)
+                .inputKey("input").outputKey("messages").build();
     }
 }

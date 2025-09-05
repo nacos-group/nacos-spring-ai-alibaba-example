@@ -174,14 +174,14 @@ public class NacosAgentExecutorBySaaAgent implements AgentExecutor {
                 return;
             }
             if ("preTool".equals(nodeOutput.node())) {
-                content = "正在调用Tool,请等待结果";
+                content = "\n正在调用Tool,请等待结果\n";
                 Message message = taskUpdater.newAgentMessage(Collections.singletonList(new TextPart(content)),
                         Collections.emptyMap());
                 taskUpdater.startWork(message);
                 return;
             }
             if ("tool".equals(nodeOutput.node())) {
-                content = "Tool调用已完成";
+                content = "Tool调用已完成\n";
                 Message message = taskUpdater.newAgentMessage(Collections.singletonList(new TextPart(content)),
                         Collections.emptyMap());
                 taskUpdater.startWork(message);

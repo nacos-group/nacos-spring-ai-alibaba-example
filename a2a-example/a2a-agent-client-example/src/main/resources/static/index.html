@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>阿里云助手</title>
+    <!-- 引入marked.js用于Markdown渲染 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+    <!-- 引入highlight.js用于代码高亮 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -167,6 +172,128 @@
         .clear-button:hover {
             background: #5a6268;
         }
+
+        /* Markdown样式 */
+        .bot-message h1, .bot-message h2, .bot-message h3, .bot-message h4, .bot-message h5, .bot-message h6 {
+            margin: 16px 0 8px 0;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        .bot-message h1 { font-size: 1.5em; border-bottom: 1px solid #eaecef; padding-bottom: 8px; }
+        .bot-message h2 { font-size: 1.3em; border-bottom: 1px solid #eaecef; padding-bottom: 6px; }
+        .bot-message h3 { font-size: 1.1em; }
+        .bot-message h4 { font-size: 1em; }
+        .bot-message h5 { font-size: 0.9em; }
+        .bot-message h6 { font-size: 0.8em; color: #6a737d; }
+
+        .bot-message p {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .bot-message ul, .bot-message ol {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+
+        .bot-message li {
+            margin: 4px 0;
+            line-height: 1.6;
+        }
+
+        .bot-message blockquote {
+            margin: 16px 0;
+            padding: 0 16px;
+            color: #6a737d;
+            border-left: 4px solid #dfe2e5;
+            background: #f6f8fa;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .bot-message code {
+            background: #f6f8fa;
+            border-radius: 3px;
+            font-size: 85%;
+            margin: 0;
+            padding: 2px 4px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+
+        .bot-message pre {
+            background: #f6f8fa;
+            border-radius: 6px;
+            font-size: 85%;
+            line-height: 1.45;
+            overflow: auto;
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        .bot-message pre code {
+            background: transparent;
+            border: 0;
+            display: inline;
+            line-height: inherit;
+            margin: 0;
+            max-width: auto;
+            overflow: visible;
+            padding: 0;
+            word-wrap: normal;
+        }
+
+        .bot-message table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            margin: 16px 0;
+            width: 100%;
+        }
+
+        .bot-message table th,
+        .bot-message table td {
+            border: 1px solid #dfe2e5;
+            padding: 6px 13px;
+            text-align: left;
+        }
+
+        .bot-message table th {
+            background: #f6f8fa;
+            font-weight: 600;
+        }
+
+        .bot-message table tr:nth-child(2n) {
+            background: #f6f8fa;
+        }
+
+        .bot-message hr {
+            border: 0;
+            border-top: 1px solid #eaecef;
+            margin: 24px 0;
+        }
+
+        .bot-message a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .bot-message a:hover {
+            text-decoration: underline;
+        }
+
+        .bot-message strong {
+            font-weight: 600;
+        }
+
+        .bot-message em {
+            font-style: italic;
+        }
+
+        .bot-message img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin: 8px 0;
+        }
     </style>
 </head>
 <body>
@@ -195,6 +322,7 @@
             >
             <button id="sendButton" class="send-button">➤</button>
             <button id="clearButton" class="clear-button">清空</button>
+            <button id="testMarkdownButton" class="clear-button">测试Markdown</button>
         </div>
     </div>
 
@@ -205,15 +333,45 @@
                 this.chatInput = document.getElementById('chatInput');
                 this.sendButton = document.getElementById('sendButton');
                 this.clearButton = document.getElementById('clearButton');
+                this.testMarkdownButton = document.getElementById('testMarkdownButton');
                 this.typingIndicator = document.getElementById('typingIndicator');
                 this.isStreaming = false;
+                this.currentBotMessage = null;
+                this.markdownBuffer = '';
+                
+                // 配置marked选项
+                this.configureMarked();
                 
                 this.initEventListeners();
+            }
+
+            configureMarked() {
+                // 配置marked选项
+                marked.setOptions({
+                    highlight: function(code, lang) {
+                        if (lang && hljs.getLanguage(lang)) {
+                            try {
+                                return hljs.highlight(code, { language: lang }).value;
+                            } catch (err) {}
+                        }
+                        try {
+                            return hljs.highlightAuto(code).value;
+                        } catch (err) {}
+                        return code;
+                    },
+                    breaks: true,  // 将单个换行符转换为<br>
+                    gfm: true,     // 启用GitHub风格Markdown
+                    pedantic: false,
+                    sanitize: false,
+                    smartLists: true,
+                    smartypants: false
+                });
             }
 
             initEventListeners() {
                 this.sendButton.addEventListener('click', () => this.sendMessage());
                 this.clearButton.addEventListener('click', () => this.clearChat());
+                this.testMarkdownButton.addEventListener('click', () => this.testMarkdown());
                 this.chatInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -243,7 +401,8 @@
 
             async streamResponse(query) {
                 this.isStreaming = true;
-                const botMessageDiv = this.addMessage('', 'bot');
+                this.currentBotMessage = this.addMessage('', 'bot');
+                this.markdownBuffer = '';
                 
                 try {
                     const response = await fetch(`/agent/stream?query=${encodeURIComponent(query)}`, {
@@ -267,38 +426,116 @@
                         if (done) break;
 
                         buffer += decoder.decode(value, { stream: true });
-                        const lines = buffer.split('\n');
-                        buffer = lines.pop() || '';
-
-                        for (const line of lines) {
-                            if (line.trim() === '') continue;
+                        
+                        // 按SSE协议处理：查找完整的事件
+                        let eventEndIndex = buffer.indexOf('\n\n');
+                        while (eventEndIndex !== -1) {
+                            const eventData = buffer.substring(0, eventEndIndex);
+                            buffer = buffer.substring(eventEndIndex + 2);
                             
-                            // 处理SSE格式的数据
-                            if (line.startsWith('data:')) {
-                                const data = line.substring(5);
-                                if (data !== '[DONE]') {
-                                    botMessageDiv.textContent += data;
-                                    this.scrollToBottom();
-                                }
-                            } else if (!line.startsWith(':')) {
-                                // 如果不是SSE格式，直接添加内容
-                                botMessageDiv.textContent += line;
-                                this.scrollToBottom();
-                            }
+                            // 处理SSE事件
+                            this.processSSEEvent(eventData);
+                            
+                            eventEndIndex = buffer.indexOf('\n\n');
                         }
+                    }
+                    
+                    // 处理最后剩余的数据
+                    if (buffer.trim()) {
+                        this.processSSEEvent(buffer);
                     }
                 } catch (error) {
                     console.error('Streaming error:', error);
-                    botMessageDiv.textContent = '抱歉，连接出现问题，请稍后重试。';
+                    this.currentBotMessage.innerHTML = '抱歉，连接出现问题，请稍后重试。';
                 } finally {
                     this.isStreaming = false;
+                    this.currentBotMessage = null;
+                    this.markdownBuffer = '';
+                }
+            }
+
+            processSSEEvent(eventData) {
+                const lines = eventData.split('\n');
+                let data = '';
+                
+                if (eventData.startsWith('data:')) {
+                    data = eventData.replaceAll('data:', '');
+                } else {
+                    data = eventData;
+                }
+                
+                // if (lines.length > 1) {
+                //     for (const line of lines) {
+                //         if (line.startsWith('data:')) {
+                //             const lineData = line.substring(5).trim();
+                //             if (lineData !== '[DONE]') {
+                //                 data += lineData + '\n';
+                //             }
+                //         }
+                //     }
+                // } else {
+                //     if (eventData.startsWith('data:')) {
+                //         const lineData = eventData.substring(5).trim();
+                //         if (lineData !== '[DONE]') {
+                //             data += lineData;
+                //         }
+                //     }
+                // }
+                
+                if (data) {
+                    // 直接添加数据，不强制添加换行符
+                    this.markdownBuffer += data;
+                    this.updateMarkdownContent();
+                }
+            }
+
+            updateMarkdownContent() {
+                if (this.currentBotMessage) {
+                    try {
+                        // 预处理内容，确保换行符被正确处理
+                        let processedContent = this.markdownBuffer;
+                        
+                        // 确保内容以换行符结尾，这样Markdown解析器能正确处理
+                        if (processedContent && !processedContent.endsWith('\n')) {
+                            processedContent += '\n';
+                        }
+                        
+                        // 渲染Markdown内容
+                        const htmlContent = marked.parse(processedContent);
+                        this.currentBotMessage.innerHTML = htmlContent;
+                        this.scrollToBottom();
+                    } catch (error) {
+                        console.error('Markdown parsing error:', error);
+                        // 如果Markdown解析失败，回退到纯文本
+                        this.currentBotMessage.textContent = this.markdownBuffer;
+                        this.scrollToBottom();
+                    }
                 }
             }
 
             addMessage(content, type) {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${type}-message`;
-                messageDiv.textContent = content;
+                
+                if (type === 'bot' && content) {
+                    // 对于机器人消息，尝试渲染Markdown
+                    try {
+                        // 预处理内容，确保换行符被正确处理
+                        let processedContent = content;
+                        if (processedContent && !processedContent.endsWith('\n')) {
+                            processedContent += '\n';
+                        }
+                        
+                        const htmlContent = marked.parse(processedContent);
+                        messageDiv.innerHTML = htmlContent;
+                    } catch (error) {
+                        console.error('Markdown parsing error:', error);
+                        messageDiv.textContent = content;
+                    }
+                } else {
+                    messageDiv.textContent = content;
+                }
+                
                 this.chatMessages.appendChild(messageDiv);
                 this.scrollToBottom();
                 return messageDiv;
@@ -315,13 +552,67 @@
             clearChat() {
                 this.chatMessages.innerHTML = `
                     <div class="message bot-message">
-                        你好！我是AI助手，有什么可以帮助你的吗？
+                        你好！我是阿里云助手，有什么可以帮助你的吗？
                     </div>
                 `;
             }
 
             scrollToBottom() {
                 this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+
+            testMarkdown() {
+                const testMarkdown = `# Markdown 测试
+
+这是一个 **Markdown** 渲染测试！
+
+## 功能特性
+
+- ✅ 支持标题
+- ✅ 支持**粗体**和*斜体*
+- ✅ 支持代码块
+- ✅ 支持列表
+- ✅ 支持表格
+- ✅ 支持换行符处理
+- ✅ 支持SSE流式渲染
+
+### 换行符测试
+
+这是第一行
+这是第二行
+
+### 标题测试
+
+#### 四级标题
+##### 五级标题
+###### 六级标题
+
+### 代码示例
+
+\`\`\`javascript
+function hello() {
+    console.log("Hello, Markdown!");
+    return "换行符测试";
+}
+\`\`\`
+
+### 表格示例
+
+| 功能 | 状态 | 说明 |
+|------|------|------|
+| 标题 | ✅ | 支持 H1-H6 |
+| 代码 | ✅ | 支持行内和块级代码 |
+| 列表 | ✅ | 支持有序和无序列表 |
+| 换行 | ✅ | 正确处理\\n换行符 |
+| SSE流 | ✅ | 正确处理流式数据 |
+
+> 这是一个引用块，用于突出显示重要信息。
+
+---
+
+**测试完成！** 如果你能看到格式化的内容，说明 Markdown 渲染功能正常工作。`;
+
+                this.addMessage(testMarkdown, 'bot');
             }
         }
 

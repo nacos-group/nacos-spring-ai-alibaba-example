@@ -21,19 +21,20 @@ spring:
       a2a:
         enabled: false
         nacos:
-          server-addr: 127.0.0.1:8848
+#          server-addr: 127.0.0.1:8848
+          server-addr: 47.83.210.27:8848
           username: ${NACOS_USERNAME:nacos}
           password: ${NACOS_PASSWORD}
       graph:
         observation:
           enabled: true
-        arms:
+      arms:
+        enabled: true
+        tool:
           enabled: true
-          tool:
-            enabled: true
-          model:
-            capture-input: true
-            capture-output: true
+        model:
+          capture-input: true
+          capture-output: true
 
 # 调试日志
 logging:

@@ -22,7 +22,7 @@ spring:
     alibaba:
       a2a:
         nacos:
-          server-addr: 127.0.0.1:8848
+          server-addr: ${NACOS_ADDRESS_ENV:127.0.0.1:8848}
           username: ${NACOS_USERNAME:nacos}
           password: ${NACOS_PASSWORD}
       mcp:
@@ -41,13 +41,13 @@ spring:
       graph:
         observation:
           enabled: true
-        arms:
+      arms:
+        enabled: true
+        tool:
           enabled: true
-          tool:
-            enabled: true
-          model:
-            capture-input: true
-            capture-output: true
+        model:
+          capture-input: true
+          capture-output: true
 
 # 调试日志
 logging:

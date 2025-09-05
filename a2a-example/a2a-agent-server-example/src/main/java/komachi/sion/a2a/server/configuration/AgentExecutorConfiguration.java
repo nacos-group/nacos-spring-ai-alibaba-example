@@ -24,7 +24,7 @@ public class AgentExecutorConfiguration {
     
     @Bean
     //    @Primary
-    public AgentExecutor agentExecutorByChatClient(ChatClient chatClient,
+    public AgentExecutor agentExecutorByChatClient(@Qualifier("nacosChatClient") ChatClient chatClient,
             @Qualifier("loadbalancedMcpAsyncToolCallbacks") ToolCallbackProvider tools) {
         return new NacosAgentExecutorByChatClient(chatClient, tools);
     }

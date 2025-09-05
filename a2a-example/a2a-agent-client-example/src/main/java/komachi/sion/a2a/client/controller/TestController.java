@@ -6,12 +6,14 @@ import com.alibaba.cloud.ai.graph.exception.GraphStateException;
 import com.alibaba.cloud.ai.graph.streaming.StreamingOutput;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import jakarta.servlet.http.HttpServletResponse;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,13 +42,14 @@ public class TestController {
     
     private final BaseAgent baseAgent;
     
-    public TestController(ChatClient chatClient, BaseAgent baseAgent) {
+    public TestController(@Qualifier("nacosChatClient") ChatClient chatClient, BaseAgent baseAgent) {
         this.dashScopeChatClient = chatClient;
         this.baseAgent = baseAgent;
     }
     
     @GetMapping("/simple/chat")
-    public String simpleChat(@RequestParam(value = "query", defaultValue = "你好，请随机生成一个数字") String query) {
+    public String simpleChat(
+            @RequestParam(value = "query", defaultValue = "你好，能告诉我一些关于阿里云的信息吗") String query) {
         return dashScopeChatClient.prompt(query).call().content();
     }
     
@@ -55,26 +58,27 @@ public class TestController {
      */
     @GetMapping("/stream/chat")
     public Flux<String> streamChat(
-            @RequestParam(value = "query", defaultValue = "你好，请随机生成一个数字") String query,
-            HttpServletResponse response) {
-        response.setCharacterEncoding("UTF-8");
+            @RequestParam(value = "query", defaultValue = "你好，能告诉我一些关于阿里云的信息吗") String query) {
         Flux<ChatClientResponse> chatClientResponse = dashScopeChatClient.prompt(query).stream().chatClientResponse();
         return chatClientResponse.mapNotNull(ChatClientResponse::chatResponse).map(new StreamResultFunction())
                 .filter(StringUtils::hasLength);
     }
     
     @GetMapping("/agent/chat")
-    public String agentChat(@RequestParam(value = "query", defaultValue = "你好，请随机生成一个数字") String query)
+    public String agentChat(
+            @RequestParam(value = "query", defaultValue = "你好，能告诉我一些关于阿里云的信息吗") String query)
             throws GraphStateException, GraphRunnerException {
         return baseAgent.invoke(Map.of("input", query)).orElseThrow().toString();
     }
     
     @GetMapping("/agent/stream")
     public Flux<String> agentStream(
-            @RequestParam(value = "query", defaultValue = "你好，请随机生成一个数字") String query)
+            @RequestParam(value = "query", defaultValue = "你好，能告诉我一些关于阿里云的信息吗") String query)
             throws GraphStateException, GraphRunnerException {
         Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
+//        Context current = Context.current();
         new Thread(() -> {
+//            try (Scope scope = current.makeCurrent()) {
             try {
                 baseAgent.stream(Map.of("input", query)).forEachAsync(output -> {
                     try {

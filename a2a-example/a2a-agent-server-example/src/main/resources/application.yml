@@ -38,6 +38,16 @@ spring:
                 server1:
                   service-name: nacos-mcp-server-gateway
                   version: 1.0.0
+      graph:
+        observation:
+          enabled: true
+        arms:
+          enabled: true
+          tool:
+            enabled: true
+          model:
+            capture-input: true
+            capture-output: true
 
 # 调试日志
 logging:
@@ -48,3 +58,38 @@ logging:
         cloud:
           ai:
             graph: DEBUG
+
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: "*"
+#  endpoint:
+#    health:
+#      # health status check with detailed messages
+#      show-details: always
+#  tracing:
+#    sampling:
+#      # trace information with every request
+#      probability: 1.0
+#  observations:
+#    annotations:
+#      enabled: true
+#  otlp:
+#    tracing:
+#      export:
+#        enabled: true
+#      endpoint: http://${STUDIO_IP}:4318/v1/traces
+#    metrics:
+#      export:
+#        enabled: false
+#    logging:
+#      export:
+#        enabled: false
+#  opentelemetry:
+#    resource-attributes:
+#      service:
+#        name: nacos-helper-agent
+#        version: 1.0.0
+#      deployment:
+#        environment: test

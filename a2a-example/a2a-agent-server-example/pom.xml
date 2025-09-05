@@ -20,7 +20,11 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         
         <dependency>
@@ -44,6 +48,33 @@
             <groupId>org.example</groupId>
             <artifactId>a2a-autoconfiguration</artifactId>
             <version>1.0-SNAPSHOT</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-starter-graph-observation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.opentelemetry</groupId>-->
+<!--            <artifactId>opentelemetry-exporter-otlp</artifactId>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>io.micrometer</groupId>-->
+<!--            <artifactId>micrometer-registry-otlp</artifactId>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-autoconfigure-arms-observation</artifactId>
         </dependency>
     </dependencies>
 

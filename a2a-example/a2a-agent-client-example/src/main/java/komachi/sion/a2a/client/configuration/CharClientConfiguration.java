@@ -1,5 +1,6 @@
 package komachi.sion.a2a.client.configuration;
 
+import com.alibaba.cloud.ai.graph.CompileConfig;
 import com.alibaba.cloud.ai.graph.KeyStrategy;
 import com.alibaba.cloud.ai.graph.KeyStrategyFactory;
 import com.alibaba.cloud.ai.graph.agent.BaseAgent;
@@ -16,6 +17,7 @@ import komachi.sion.a2a.client.remote.RemoteAgent;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -46,7 +48,7 @@ public class CharClientConfiguration {
     private static final String COMMON_QUESTION_ANSWER_PROMPT = "## Role \n\n"
             + "You are a helpful assistant, you should try you best to answer users' problem according your knowledge.";
     
-    @Bean
+    @Bean(name = "nacosChatClient")
     public ChatClient chatClient(ChatClient.Builder chatClientBuilder, ToolCallback... toolCallbacks)
             throws JsonProcessingException {
         List<Map<String, Object>> agentList = new LinkedList<>();
@@ -62,17 +64,23 @@ public class CharClientConfiguration {
         }).defaultToolCallbacks(toolCallbacks).build();
     }
     
+    @Bean(name = "agentChatClient")
+    public ChatClient agentChatClient(ChatClient.Builder chatClientBuilder) {
+        return chatClientBuilder.build();
+    }
+    
     @Bean
     @Primary
-    public BaseAgent OrchestratorAgent(ChatModel chatModel, A2aMaintainerService a2aMaintainerService)
+    public BaseAgent OrchestratorAgent(@Qualifier("agentChatClient") ChatClient chatClient, ChatModel chatModel,
+            A2aMaintainerService a2aMaintainerService, CompileConfig compileConfig)
             throws GraphStateException, NacosException {
         ReactAgent commonQuestionAnswerAgent = ReactAgent.builder().name("common_question_answer_agent")
                 .description("Agent to answer common question").instruction(COMMON_QUESTION_ANSWER_PROMPT)
-                .model(chatModel).outputKey("messages").build();
-//        NacosA2aRemoteAgent blogWriterAgent = new NacosA2aRemoteAgent.Builder().a2aMaintainerService(
-//                a2aMaintainerService).name("Blog_Writing_Agent").build();
+                .chatClient(chatClient).outputKey("messages").compileConfig(compileConfig).build();
+        //        NacosA2aRemoteAgent blogWriterAgent = new NacosA2aRemoteAgent.Builder().a2aMaintainerService(
+        //                a2aMaintainerService).name("Blog_Writing_Agent").build();
         NacosA2aRemoteAgent nacosAgent = new NacosA2aRemoteAgent.Builder().a2aMaintainerService(a2aMaintainerService)
-                .name("Nacos_Agent").build();
+                .name("Nacos_Agent").compileConfig(compileConfig).build();
         KeyStrategyFactory stateFactory = () -> {
             HashMap<String, KeyStrategy> keyStrategyHashMap = new HashMap<>();
             keyStrategyHashMap.put("input", new ReplaceStrategy());
@@ -81,11 +89,12 @@ public class CharClientConfiguration {
             keyStrategyHashMap.put("reviewed_article", new ReplaceStrategy());
             return keyStrategyHashMap;
         };
-//        return LlmRoutingAgent.builder().name("orchestrator").description("An orchestrator agent").model(chatModel)
-//                .subAgents(List.of(commonQuestionAnswerAgent, blogWriterAgent, nacosAgent)).state(stateFactory)
-//                .inputKey("input").outputKey("output").build();
+        //        return LlmRoutingAgent.builder().name("orchestrator").description("An orchestrator agent").model(chatModel)
+        //                .subAgents(List.of(commonQuestionAnswerAgent, blogWriterAgent, nacosAgent)).state(stateFactory)
+        //                .inputKey("input").outputKey("output").build();
         return LlmRoutingAgent.builder().name("orchestrator").description("An orchestrator agent").model(chatModel)
-                .subAgents(List.of(commonQuestionAnswerAgent, nacosAgent)).state(stateFactory)
-                .inputKey("input").outputKey("messages").build();
+                .client(chatClient).subAgents(List.of(commonQuestionAnswerAgent, nacosAgent)).state(stateFactory)
+                .inputKey("input").outputKey("messages").compileConfig(compileConfig).build();
     }
+    
 }

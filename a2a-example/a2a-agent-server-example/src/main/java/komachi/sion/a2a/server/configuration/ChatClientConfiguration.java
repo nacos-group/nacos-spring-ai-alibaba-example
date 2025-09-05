@@ -1,7 +1,6 @@
 package komachi.sion.a2a.server.configuration;
 
-import com.alibaba.cloud.ai.graph.OverAllState;
-import com.alibaba.cloud.ai.graph.action.NodeAction;
+import com.alibaba.cloud.ai.graph.CompileConfig;
 import com.alibaba.cloud.ai.graph.agent.ReactAgent;
 import com.alibaba.cloud.ai.graph.exception.GraphStateException;
 import io.a2a.spec.AgentCapabilities;
@@ -36,37 +35,42 @@ public class ChatClientConfiguration {
                     + "If user ask not nacos relative question, Please answer with apology. \n When you answer Nacos' question, "
                     + "you can try to use relative tools to query data and do analyze. If no suitable tools found, please answer Nacos' question by your knowledge.\n";
     
-//    private static final String SYSTEM_PROMPT =
-//            "An assistant or maintainer for nacos. You only try to answer nacos' question. "
-//                    + "If user ask not nacos relative question, Please answer with apology. \n When you answer Nacos' question, "
-//                    + "you can try to use relative tools to query data and do analyze. If no suitable tools found, please answer Nacos' question by your knowledge.\n"
-//                    + "Example: \n - question: What's the Nacos. Answer: Nacos is an open-source platform developed by Alibaba for dynamic service discovery, configuration management, and service governance. It is designed to simplify the architecture of cloud-native applications and microservices by providing key capabilities:\n"
-//                    + "\n" + "## Key Features\n" + "1. Service Discovery\n" + "\n"
-//                    + "- Register and discover services (like Eureka/Consul).\n"
-//                    + "- Supports health checks (active/passive) for service instances.\n"
-//                    + "- Integrates with Spring Cloud, Dubbo, and Kubernetes.\n" + "\n"
-//                    + "2. Dynamic Configuration Management\n" + "\n"
-//                    + "- Centrally manage configurations across environments.\n"
-//                    + "- Push updates to services in real-time.\n"
-//                    + "- Supports multiple formats (properties, YAML, JSON, etc.).\n" + "\n"
-//                    + "3.Service Metadata and Routing\n" + "\n" + "- Manage service metadata, weights, and labels.\n"
-//                    + "- Enable traffic routing (e.g., blue-green deployments).\n" + "\n"
-//                    + "4. DNS-Based Service Addressing\n" + "\n"
-//                    + "- Use DNS protocols to resolve service names to IP addresses.\n"
-//                    + "- Works seamlessly with Kubernetes and hybrid clouds.\n" + "\n" + "5. Distributed Coordination\n"
-//                    + "\n" + "- Support for ephemeral instances and CP/AP consistency models.\n" + "\n"
-//                    + "## Why Use Nacos?\n" + "\n"
-//                    + "- Unified Platform: Combines service discovery + config management.\n"
-//                    + "- Lightweight: Easy to deploy (standalone or cluster).\n"
-//                    + "- Cloud-Agnostic: Works with Kubernetes, Spring Cloud, and Dubbo.\n"
-//                    + "- Enterprise-Ready: Used by Alibaba in production for high-scale scenarios.\n" + "\n"
-//                    + "Official Website: https://nacos.io";
+    //    private static final String SYSTEM_PROMPT =
+    //            "An assistant or maintainer for nacos. You only try to answer nacos' question. "
+    //                    + "If user ask not nacos relative question, Please answer with apology. \n When you answer Nacos' question, "
+    //                    + "you can try to use relative tools to query data and do analyze. If no suitable tools found, please answer Nacos' question by your knowledge.\n"
+    //                    + "Example: \n - question: What's the Nacos. Answer: Nacos is an open-source platform developed by Alibaba for dynamic service discovery, configuration management, and service governance. It is designed to simplify the architecture of cloud-native applications and microservices by providing key capabilities:\n"
+    //                    + "\n" + "## Key Features\n" + "1. Service Discovery\n" + "\n"
+    //                    + "- Register and discover services (like Eureka/Consul).\n"
+    //                    + "- Supports health checks (active/passive) for service instances.\n"
+    //                    + "- Integrates with Spring Cloud, Dubbo, and Kubernetes.\n" + "\n"
+    //                    + "2. Dynamic Configuration Management\n" + "\n"
+    //                    + "- Centrally manage configurations across environments.\n"
+    //                    + "- Push updates to services in real-time.\n"
+    //                    + "- Supports multiple formats (properties, YAML, JSON, etc.).\n" + "\n"
+    //                    + "3.Service Metadata and Routing\n" + "\n" + "- Manage service metadata, weights, and labels.\n"
+    //                    + "- Enable traffic routing (e.g., blue-green deployments).\n" + "\n"
+    //                    + "4. DNS-Based Service Addressing\n" + "\n"
+    //                    + "- Use DNS protocols to resolve service names to IP addresses.\n"
+    //                    + "- Works seamlessly with Kubernetes and hybrid clouds.\n" + "\n" + "5. Distributed Coordination\n"
+    //                    + "\n" + "- Support for ephemeral instances and CP/AP consistency models.\n" + "\n"
+    //                    + "## Why Use Nacos?\n" + "\n"
+    //                    + "- Unified Platform: Combines service discovery + config management.\n"
+    //                    + "- Lightweight: Easy to deploy (standalone or cluster).\n"
+    //                    + "- Cloud-Agnostic: Works with Kubernetes, Spring Cloud, and Dubbo.\n"
+    //                    + "- Enterprise-Ready: Used by Alibaba in production for high-scale scenarios.\n" + "\n"
+    //                    + "Official Website: https://nacos.io";
     
-    @Bean
+    @Bean("nacosChatClient")
     public ChatClient chatClient(ChatClient.Builder chatClientBuilder,
             @Qualifier("loadbalancedMcpAsyncToolCallbacks") ToolCallbackProvider tools) {
         return chatClientBuilder.defaultSystem(SYSTEM_PROMPT).build();
-//        return chatClientBuilder.defaultSystem(SYSTEM_PROMPT).defaultToolCallbacks(tools).build();
+        //        return chatClientBuilder.defaultSystem(SYSTEM_PROMPT).defaultToolCallbacks(tools).build();
+    }
+    
+    @Bean("agentChatClient")
+    public ChatClient agentChatClient(ChatClient.Builder chatClientBuilder) {
+        return chatClientBuilder.build();
     }
     
     @Bean
@@ -86,10 +90,12 @@ public class ChatClientConfiguration {
     }
     
     @Bean
-    public ReactAgent nacosAgent(AgentCard agentCard, ChatModel chatModel,
-            @Qualifier("loadbalancedMcpAsyncToolCallbacks") ToolCallbackProvider tools) throws GraphStateException {
-        return ReactAgent.builder().name(agentCard.name()).description(agentCard.description()).model(chatModel)
-                .instruction(SYSTEM_PROMPT).tools(Arrays.asList(tools.getToolCallbacks())).preToolHook(state -> {
+    public ReactAgent nacosAgent(AgentCard agentCard, ChatModel chatModel, @Qualifier("agentChatClient") ChatClient chatClient,
+            @Qualifier("loadbalancedMcpAsyncToolCallbacks") ToolCallbackProvider tools, CompileConfig compileConfig)
+            throws GraphStateException {
+        return ReactAgent.builder().name(agentCard.name()).description(agentCard.description()).chatClient(chatClient)
+                .instruction(SYSTEM_PROMPT).tools(Arrays.asList(tools.getToolCallbacks())).compileConfig(compileConfig)
+                .preToolHook(state -> {
                     LOGGER.info("Current Agent `{}` prepare to call tool", agentCard.name());
                     return Map.of();
                 }).postToolHook(state -> {

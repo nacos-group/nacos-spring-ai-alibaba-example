@@ -1,5 +1,6 @@
 package komachi.sion.a2a.client.remote;
 
+import com.alibaba.cloud.ai.graph.CompileConfig;
 import com.alibaba.cloud.ai.graph.NodeOutput;
 import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.action.AsyncNodeAction;
@@ -30,10 +31,12 @@ public class NacosA2aRemoteAgent extends BaseAgent {
     
     private final AgentCard agentCard;
     
-    private NacosA2aRemoteAgent(AgentCard agentCard, String outputKey) throws GraphStateException {
+    private NacosA2aRemoteAgent(AgentCard agentCard, String outputKey, CompileConfig compileConfig)
+            throws GraphStateException {
         this.agentCard = agentCard;
         this.a2aRemoteAgent = A2aRemoteAgent.builder().name(agentCard.getName()).description(agentCard.getDescription())
-                .agentCard(AgentCardConverterUtil.convertToA2aAgentCard(agentCard)).outputKey(outputKey).build();
+                .agentCard(AgentCardConverterUtil.convertToA2aAgentCard(agentCard)).outputKey(outputKey)
+                .compileConfig(compileConfig).build();
     }
     
     @Override
@@ -81,6 +84,8 @@ public class NacosA2aRemoteAgent extends BaseAgent {
         
         private String outputKey = "messages";
         
+        private CompileConfig compileConfig;
+        
         public Builder a2aMaintainerService(A2aMaintainerService a2aMaintainerService) {
             this.a2aMaintainerService = a2aMaintainerService;
             return this;
@@ -96,6 +101,11 @@ public class NacosA2aRemoteAgent extends BaseAgent {
             return this;
         }
         
+        public Builder compileConfig(CompileConfig compileConfig) {
+            this.compileConfig = compileConfig;
+            return this;
+        }
+        
         public NacosA2aRemoteAgent build() throws GraphStateException, NacosException {
             if (name == null || name.trim().isEmpty()) {
                 throw new IllegalArgumentException("Name must be provided");
@@ -104,7 +114,7 @@ public class NacosA2aRemoteAgent extends BaseAgent {
                 throw new IllegalArgumentException("Nacos client can't be null");
             }
             AgentCard agentCard = this.a2aMaintainerService.getAgentCard(name, Constants.DEFAULT_NAMESPACE_ID);
-            return new NacosA2aRemoteAgent(agentCard, outputKey);
+            return new NacosA2aRemoteAgent(agentCard, outputKey, compileConfig);
         }
     }
 }

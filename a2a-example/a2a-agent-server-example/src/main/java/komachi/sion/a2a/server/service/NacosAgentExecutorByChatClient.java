@@ -21,7 +21,6 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.tool.ToolCallbackProvider;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 
@@ -69,10 +68,9 @@ public class NacosAgentExecutorByChatClient implements AgentExecutor {
     private void doAsyncTask(RequestContext context, EventQueue eventQueue, String string) {
         Task task = buildNewTaskIfAbsent(context, eventQueue);
         TaskUpdater updater = buildNewTask(context, eventQueue);
-        Flux<ChatResponse> chatResponse = chatClient.prompt(string).options(ToolCallingChatOptions.builder()
-                .toolCallbacks(tools.getToolCallbacks())
-                .internalToolExecutionEnabled(true)
-                .build()).stream().chatResponse();
+        Flux<ChatResponse> chatResponse = chatClient.prompt(string).options(
+                ToolCallingChatOptions.builder().toolCallbacks(tools.getToolCallbacks())
+                        .internalToolExecutionEnabled(true).build()).stream().chatResponse();
         //        chatResponse.subscribe(new TokenByTokenSubscriber(updater, context));
         chatResponse.subscribe(new TypedSubscriber(updater, context));
         waitTaskCompleted(task);

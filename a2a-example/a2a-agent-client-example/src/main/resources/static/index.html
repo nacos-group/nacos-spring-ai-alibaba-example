@@ -322,7 +322,7 @@
             >
             <button id="sendButton" class="send-button">➤</button>
             <button id="clearButton" class="clear-button">清空</button>
-            <button id="testMarkdownButton" class="clear-button">测试Markdown</button>
+<!--            <button id="testMarkdownButton" class="clear-button">测试Markdown</button>-->
         </div>
     </div>
 
@@ -333,7 +333,7 @@
                 this.chatInput = document.getElementById('chatInput');
                 this.sendButton = document.getElementById('sendButton');
                 this.clearButton = document.getElementById('clearButton');
-                this.testMarkdownButton = document.getElementById('testMarkdownButton');
+                // this.testMarkdownButton = document.getElementById('testMarkdownButton');
                 this.typingIndicator = document.getElementById('typingIndicator');
                 this.isStreaming = false;
                 this.currentBotMessage = null;
@@ -371,7 +371,7 @@
             initEventListeners() {
                 this.sendButton.addEventListener('click', () => this.sendMessage());
                 this.clearButton.addEventListener('click', () => this.clearChat());
-                this.testMarkdownButton.addEventListener('click', () => this.testMarkdown());
+                // this.testMarkdownButton.addEventListener('click', () => this.testMarkdown());
                 this.chatInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();

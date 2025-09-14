@@ -161,7 +161,11 @@ public class NacosAgentExecutorBySaaAgent implements AgentExecutor {
                 if (!StringUtils.hasLength(chunkContent)) {
                     return;
                 }
-                innerContent = JSON.toJSONString(Map.of(nodeOutput.node(), chunkContent));
+                JSONObject outputJson = new JSONObject();
+                outputJson.put("data", nodeOutput.state().data());
+                outputJson.put("node", nodeOutput.node());
+                innerContent = JSON.toJSONString(outputJson);
+//                innerContent = JSON.toJSONString(Map.of(nodeOutput.node(), chunkContent));
                 content = chunkContent;
             } else {
                 JSONObject outputJson = new JSONObject();

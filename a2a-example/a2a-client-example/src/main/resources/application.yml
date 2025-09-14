@@ -1,0 +1,18 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: a2s-client-example
+  ai:
+    alibaba:
+      a2a:
+        nacos:
+          discovery:
+            enabled: true
+#        client:
+#          card:
+#            well-known-url: http://localhost:9999/.well-known/agent.json
+logging:
+  level:
+    root: debug

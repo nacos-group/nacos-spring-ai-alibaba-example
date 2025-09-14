@@ -107,10 +107,10 @@ public class AgentController {
                 .map((Function<JSONRPCResponse<?>, JSONRPCResponse<?>>) jsonrpcResponse -> {
                     //                    LOGGER.info("get response {}", jsonrpcResponse);
                     return jsonrpcResponse;
-                    //                });
+                                    });
                     //                }).subscribeOn(Schedulers.parallel()).publishOn(Schedulers.parallel());
-                }).delaySubscription(Duration.ofMillis(10))
-                .contextWrite(ctx -> ctx.put(ObservationThreadLocalAccessor.KEY, currentObservation));
+//                }).delaySubscription(Duration.ofMillis(10))
+//                .contextWrite(ctx -> ctx.put(ObservationThreadLocalAccessor.KEY, currentObservation));
     }
     
     private JSONRPCResponse<?> handleNonStreamRequest(String body, ServerCallContext context)

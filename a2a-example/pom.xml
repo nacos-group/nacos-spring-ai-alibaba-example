@@ -13,9 +13,6 @@
     <packaging>pom</packaging>
     
     <modules>
-        <module>a2a-agent-server-example</module>
-        <module>a2a-autoconfiguration</module>
-        <module>a2a-agent-client-example</module>
         <module>a2a-server-example</module>
         <module>a2a-client-example</module>
     </modules>

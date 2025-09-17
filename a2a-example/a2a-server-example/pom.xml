@@ -38,12 +38,6 @@
             <groupId>com.alibaba.cloud.ai</groupId>
             <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>
         </dependency>
-        
-        <dependency>
-            <groupId>io.github.a2asdk</groupId>
-            <artifactId>a2a-java-sdk-server-common</artifactId>
-            <version>0.2.5</version>
-        </dependency>
     </dependencies>
 
 </project>

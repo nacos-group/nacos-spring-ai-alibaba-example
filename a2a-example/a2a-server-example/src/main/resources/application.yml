@@ -17,6 +17,7 @@ spring:
         nacos:
           server-addr: localhost:8848
         server:
+          version: 1.0.1
           card:
             skills:
               - id: nacos-quesiton-answer

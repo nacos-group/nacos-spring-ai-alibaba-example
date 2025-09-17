@@ -10,9 +10,6 @@ spring:
         nacos:
           discovery:
             enabled: true
-#        client:
-#          card:
-#            well-known-url: http://localhost:9999/.well-known/agent.json
 logging:
   level:
     root: debug

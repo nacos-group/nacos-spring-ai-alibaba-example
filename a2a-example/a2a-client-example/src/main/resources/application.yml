@@ -10,6 +10,9 @@ spring:
         nacos:
           discovery:
             enabled: true
+          server-addr: ${NACOS_ADDRESS:localhost:8848}
+          username: ${NACOS_USERNAME:nacos}
+          password: ${NACOS_PASSWORD}
 logging:
   level:
     root: debug

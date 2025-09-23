@@ -21,18 +21,12 @@
         <dependency>
             <groupId>com.alibaba.cloud.ai</groupId>
             <artifactId>spring-ai-alibaba-starter-a2a-client</artifactId>
-            <version>1.0.0.4-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jboss.slf4j</groupId>
-                    <artifactId>slf4j-jboss-logmanager</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>${spring.ai.alibaba.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba.cloud.ai</groupId>
             <artifactId>spring-ai-alibaba-starter-a2a-registry</artifactId>
-            <version>1.0.0.4-SNAPSHOT</version>
+            <version>${spring.ai.alibaba.version}</version>
         </dependency>
         
         <dependency>

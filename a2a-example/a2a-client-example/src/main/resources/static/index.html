@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nacos A2A 样例</title>
+  <!-- 引入marked.js用于Markdown渲染 -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+  <!-- 引入highlight.js用于代码高亮 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .chat-container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 1400px;
+      height: 800px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: #f8f9fa;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      word-wrap: break-word;
+      line-height: 1.4;
+    }
+
+    .user-message {
+      background: #007bff;
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bot-message {
+      background: white;
+      color: #333;
+      align-self: flex-start;
+      border: 1px solid #e9ecef;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .typing-indicator {
+      background: white;
+      color: #666;
+      align-self: flex-start;
+      border: 1px solid #e9ecef;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+
+    .typing-dots {
+      display: inline-block;
+      animation: typing 1.4s infinite;
+    }
+
+    @keyframes typing {
+      0%, 60%, 100% { opacity: 0.3; }
+      30% { opacity: 1; }
+    }
+
+    .chat-input-container {
+      padding: 20px;
+      background: white;
+      border-top: 1px solid #e9ecef;
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid #e9ecef;
+      border-radius: 25px;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    .chat-input:focus {
+      border-color: #007bff;
+    }
+
+    .send-button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: transform 0.2s ease;
+    }
+
+    .send-button:hover {
+      transform: scale(1.05);
+    }
+
+    .send-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-message {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      border-radius: 18px;
+      padding: 12px 16px;
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    .clear-button {
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-left: 10px;
+    }
+
+    .clear-button:hover {
+      background: #5a6268;
+    }
+
+    /* Markdown样式 */
+    .bot-message h1, .bot-message h2, .bot-message h3, .bot-message h4, .bot-message h5, .bot-message h6 {
+      margin: 16px 0 8px 0;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    .bot-message h1 { font-size: 1.5em; border-bottom: 1px solid #eaecef; padding-bottom: 8px; }
+    .bot-message h2 { font-size: 1.3em; border-bottom: 1px solid #eaecef; padding-bottom: 6px; }
+    .bot-message h3 { font-size: 1.1em; }
+    .bot-message h4 { font-size: 1em; }
+    .bot-message h5 { font-size: 0.9em; }
+    .bot-message h6 { font-size: 0.8em; color: #6a737d; }
+
+    .bot-message p {
+      margin: 8px 0;
+      line-height: 1.6;
+    }
+
+    .bot-message ul, .bot-message ol {
+      margin: 8px 0;
+      padding-left: 24px;
+    }
+
+    .bot-message li {
+      margin: 4px 0;
+      line-height: 1.6;
+    }
+
+    .bot-message blockquote {
+      margin: 16px 0;
+      padding: 0 16px;
+      color: #6a737d;
+      border-left: 4px solid #dfe2e5;
+      background: #f6f8fa;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .bot-message code {
+      background: #f6f8fa;
+      border-radius: 3px;
+      font-size: 85%;
+      margin: 0;
+      padding: 2px 4px;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+
+    .bot-message pre {
+      background: #f6f8fa;
+      border-radius: 6px;
+      font-size: 85%;
+      line-height: 1.45;
+      overflow: auto;
+      padding: 16px;
+      margin: 16px 0;
+    }
+
+    .bot-message pre code {
+      background: transparent;
+      border: 0;
+      display: inline;
+      line-height: inherit;
+      margin: 0;
+      max-width: auto;
+      overflow: visible;
+      padding: 0;
+      word-wrap: normal;
+    }
+
+    .bot-message table {
+      border-collapse: collapse;
+      border-spacing: 0;
+      margin: 16px 0;
+      width: 100%;
+    }
+
+    .bot-message table th,
+    .bot-message table td {
+      border: 1px solid #dfe2e5;
+      padding: 6px 13px;
+      text-align: left;
+    }
+
+    .bot-message table th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+
+    .bot-message table tr:nth-child(2n) {
+      background: #f6f8fa;
+    }
+
+    .bot-message hr {
+      border: 0;
+      border-top: 1px solid #eaecef;
+      margin: 24px 0;
+    }
+
+    .bot-message a {
+      color: #0366d6;
+      text-decoration: none;
+    }
+
+    .bot-message a:hover {
+      text-decoration: underline;
+    }
+
+    .bot-message strong {
+      font-weight: 600;
+    }
+
+    .bot-message em {
+      font-style: italic;
+    }
+
+    .bot-message img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+<div class="chat-container">
+  <div class="chat-header">
+    🤖 Nacos A2A 样例
+  </div>
+  
+  <div class="chat-messages" id="chatMessages">
+    <div class="message bot-message">
+      你好！有什么可以帮助你的吗？
+    </div>
+  </div>
+  
+  <div class="typing-indicator" id="typingIndicator">
+    <span class="typing-dots">正在思考中...</span>
+  </div>
+  
+  <div class="chat-input-container">
+    <input
+        type="text"
+        id="chatInput"
+        class="chat-input"
+        placeholder="输入你的问题..."
+        autocomplete="off"
+    >
+    <button id="sendButton" class="send-button">➤</button>
+    <button id="clearButton" class="clear-button">清空</button>
+    <!--            <button id="testMarkdownButton" class="clear-button">测试Markdown</button>-->
+  </div>
+</div>
+
+<script>
+  class ChatBot {
+    constructor() {
+      this.chatMessages = document.getElementById('chatMessages');
+      this.chatInput = document.getElementById('chatInput');
+      this.sendButton = document.getElementById('sendButton');
+      this.clearButton = document.getElementById('clearButton');
+      // this.testMarkdownButton = document.getElementById('testMarkdownButton');
+      this.typingIndicator = document.getElementById('typingIndicator');
+      this.isStreaming = false;
+      this.currentBotMessage = null;
+      this.markdownBuffer = '';
+
+      // 配置marked选项
+      this.configureMarked();
+
+      this.initEventListeners();
+    }
+
+    configureMarked() {
+      // 配置marked选项
+      marked.setOptions({
+        highlight: function(code, lang) {
+          if (lang && hljs.getLanguage(lang)) {
+            try {
+              return hljs.highlight(code, { language: lang }).value;
+            } catch (err) {}
+          }
+          try {
+            return hljs.highlightAuto(code).value;
+          } catch (err) {}
+          return code;
+        },
+        breaks: true,  // 将单个换行符转换为<br>
+        gfm: true,     // 启用GitHub风格Markdown
+        pedantic: false,
+        sanitize: false,
+        smartLists: true,
+        smartypants: false
+      });
+    }
+
+    initEventListeners() {
+      this.sendButton.addEventListener('click', () => this.sendMessage());
+      this.clearButton.addEventListener('click', () => this.clearChat());
+      // this.testMarkdownButton.addEventListener('click', () => this.testMarkdown());
+      this.chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          this.sendMessage();
+        }
+      });
+    }
+
+    async sendMessage() {
+      const message = this.chatInput.value.trim();
+      if (!message || this.isStreaming) return;
+
+      // 添加用户消息
+      this.addMessage(message, 'user');
+      this.chatInput.value = '';
+      this.setLoading(true);
+
+      try {
+        await this.streamResponse(message);
+      } catch (error) {
+        console.error('Error:', error);
+        this.addMessage('抱歉，发生了错误，请稍后重试。', 'bot');
+      } finally {
+        this.setLoading(false);
+      }
+    }
+
+    async streamResponse(query) {
+      this.isStreaming = true;
+      this.currentBotMessage = this.addMessage('', 'bot');
+      this.markdownBuffer = '';
+
+      try {
+        const response = await fetch(`/stream?question=${encodeURIComponent(query)}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'text/event-stream',
+            'Cache-Control': 'no-cache'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+
+          // 按SSE协议处理：查找完整的事件
+          let eventEndIndex = buffer.indexOf('\n\n');
+          while (eventEndIndex !== -1) {
+            const eventData = buffer.substring(0, eventEndIndex);
+            buffer = buffer.substring(eventEndIndex + 2);
+
+            // 处理SSE事件
+            this.processSSEEvent(eventData);
+
+            eventEndIndex = buffer.indexOf('\n\n');
+          }
+        }
+
+        // 处理最后剩余的数据
+        if (buffer.trim()) {
+          this.processSSEEvent(buffer);
+        }
+      } catch (error) {
+        console.error('Streaming error:', error);
+        this.currentBotMessage.innerHTML = '抱歉，连接出现问题，请稍后重试。';
+      } finally {
+        this.isStreaming = false;
+        this.currentBotMessage = null;
+        this.markdownBuffer = '';
+      }
+    }
+
+    processSSEEvent(eventData) {
+      const lines = eventData.split('\n');
+      let data = '';
+
+      if (eventData.startsWith('data:')) {
+        data = eventData.replaceAll('data:', '');
+      } else {
+        data = eventData;
+      }
+
+      // if (lines.length > 1) {
+      //     for (const line of lines) {
+      //         if (line.startsWith('data:')) {
+      //             const lineData = line.substring(5).trim();
+      //             if (lineData !== '[DONE]') {
+      //                 data += lineData + '\n';
+      //             }
+      //         }
+      //     }
+      // } else {
+      //     if (eventData.startsWith('data:')) {
+      //         const lineData = eventData.substring(5).trim();
+      //         if (lineData !== '[DONE]') {
+      //             data += lineData;
+      //         }
+      //     }
+      // }
+
+      if (data) {
+        // 直接添加数据，不强制添加换行符
+        this.markdownBuffer += data;
+        this.updateMarkdownContent();
+      }
+    }
+
+    updateMarkdownContent() {
+      if (this.currentBotMessage) {
+        try {
+          // 预处理内容，确保换行符被正确处理
+          let processedContent = this.markdownBuffer;
+
+          // 确保内容以换行符结尾，这样Markdown解析器能正确处理
+          if (processedContent && !processedContent.endsWith('\n')) {
+            processedContent += '\n';
+          }
+
+          // 渲染Markdown内容
+          const htmlContent = marked.parse(processedContent);
+          this.currentBotMessage.innerHTML = htmlContent;
+          this.scrollToBottom();
+        } catch (error) {
+          console.error('Markdown parsing error:', error);
+          // 如果Markdown解析失败，回退到纯文本
+          this.currentBotMessage.textContent = this.markdownBuffer;
+          this.scrollToBottom();
+        }
+      }
+    }
+
+    addMessage(content, type) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${type}-message`;
+
+      if (type === 'bot' && content) {
+        // 对于机器人消息，尝试渲染Markdown
+        try {
+          // 预处理内容，确保换行符被正确处理
+          let processedContent = content;
+          if (processedContent && !processedContent.endsWith('\n')) {
+            processedContent += '\n';
+          }
+
+          const htmlContent = marked.parse(processedContent);
+          messageDiv.innerHTML = htmlContent;
+        } catch (error) {
+          console.error('Markdown parsing error:', error);
+          messageDiv.textContent = content;
+        }
+      } else {
+        messageDiv.textContent = content;
+      }
+
+      this.chatMessages.appendChild(messageDiv);
+      this.scrollToBottom();
+      return messageDiv;
+    }
+
+    setLoading(loading) {
+      this.sendButton.disabled = loading;
+      this.typingIndicator.style.display = loading ? 'block' : 'none';
+      if (loading) {
+        this.scrollToBottom();
+      }
+    }
+
+    clearChat() {
+      this.chatMessages.innerHTML = `
+                    <div class="message bot-message">
+                        你好！有什么可以帮助你的吗？
+                    </div>
+                `;
+    }
+
+    scrollToBottom() {
+      this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    }
+  }
+
+  // 初始化聊天机器人
+  document.addEventListener('DOMContentLoaded', () => {
+    new ChatBot();
+  });
+</script>
+</body>
+</html>

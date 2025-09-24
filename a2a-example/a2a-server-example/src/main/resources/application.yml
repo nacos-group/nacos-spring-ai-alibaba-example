@@ -1,0 +1,39 @@
+server:
+  port: 9999
+
+spring:
+  application:
+    name: a2s-server-example
+  ai:
+    dashscope:
+      api-key: ${BAILIAN_API_KEY}
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      chat:
+        options:
+          model: qwen-plus-latest
+    alibaba:
+      a2a:
+        nacos:
+          server-addr: ${NACOS_ADDRESS:localhost:8848}
+          username: ${NACOS_USERNAME:nacos}
+          password: ${NACOS_PASSWORD}
+        server:
+          version: 1.0.1
+          card:
+            url: http://localhost:9999/a2a
+            skills:
+              - id: nacos-question-answer
+                name: Nacos Question Answer
+                description: Answer questions about Nacos.
+                tags:
+                  - Nacos
+                examples:
+                  - What is Nacos?
+            icon-url: https://img.alicdn.com/imgextra/i4/O1CN01rW3vAB1FDWKSOiFf0_!!6000000000453-2-tps-204-40.png
+            documentation-url: https://nacos.io
+            provider:
+              organization: Alibaba
+              url: https://www.alibaba.com
+logging:
+  level:
+    root: debug
